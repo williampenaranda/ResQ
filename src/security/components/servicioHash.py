@@ -15,9 +15,9 @@ import bcrypt
 
 # Generamos un salt global para el proceso de hashing
 # Nota: bcrypt.gensalt() genera un salt criptográficamente seguro
-salt = bcrypt.gensalt()
 
-def hasearContrasena(contrasena: str) -> bytes:
+
+def hasearContrasena(contrasena: str) -> str:
     """
     Genera un hash seguro para una contraseña usando bcrypt.
     
@@ -25,7 +25,7 @@ def hasearContrasena(contrasena: str) -> bytes:
         contrasena (str): La contraseña en texto plano a hashear
         
     Returns:
-        bytes: El hash de la contraseña (60 caracteres)
+        str: El hash de la contraseña (60 caracteres)
         
     Raises:
         TypeError: Si la contraseña no es una cadena
@@ -35,8 +35,11 @@ def hasearContrasena(contrasena: str) -> bytes:
         raise TypeError("La contraseña debe ser una cadena")
     if not contrasena:
         raise ValueError("La contraseña no puede estar vacía")
-        
-    return bcrypt.hashpw(contrasena.encode('utf-8'), salt)
+
+    salt = bcrypt.gensalt()
+
+    hashed_password = bcrypt.hashpw(contrasena.encode('utf-8'), salt) # Hash de la contraseña
+    return hashed_password.decode('utf-8') # Devolvemos el hash como una cadena de texto
 
 def evaluarContrasena(contrasena: str, hash: str) -> bool:
     """

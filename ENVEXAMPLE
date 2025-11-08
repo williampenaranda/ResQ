@@ -1,0 +1,28 @@
+﻿# ============================================
+# Configuracion de Base de Datos
+# ============================================
+
+# Para SQLite (desarrollo local - por defecto)
+# No requiere configuracion adicional, se crea automaticamente el archivo resq.db
+DATABASE_URL=sqlite:///./resq.db
+
+# Para PostgreSQL (produccion)
+# Descomenta y configura con tus credenciales:
+# DATABASE_URL=postgresql://usuario:contraseÃ±a@localhost:5432/resq
+
+# Para MySQL (alternativa)
+# DATABASE_URL=mysql+pymysql://usuario:contraseÃ±a@localhost:3306/resq
+
+
+# ============================================
+# Configuracion de JWT (Autenticacion)
+# ============================================
+
+# Clave secreta para firmar los tokens JWT
+# IMPORTANTE: Cambia esto en produccion por una clave segura y aleatoria
+# Genera una clave segura con: python -c "import secrets; print(secrets.token_urlsafe(32))"
+JWT_SECRET_KEY=tu-clave-secreta-super-segura-cambiar-en-produccion
+
+# Tiempo de expiracion del token en minutos (1440 = 24 horas)
+# Ajusta segun tus necesidades de seguridad
+JWT_EXPIRE_MINUTES=1440

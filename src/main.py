@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from src.dataLayer.bd import inicializar_base_datos, engine
-
+from src.api.usuarios import usuarios_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,7 +31,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-
+app.include_router(usuarios_router)
 @app.get("/")
 def read_root():
     """Endpoint raíz para verificar que la API está funcionando."""

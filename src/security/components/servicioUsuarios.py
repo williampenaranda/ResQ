@@ -5,10 +5,11 @@ Proporciona funciones para crear, actualizar y gestionar usuarios en el sistema.
 
 from typing import Optional
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 from src.security.entities.Usuario import Usuario
 from src.security.components.servicioHash import hasearContrasena
-from src.dataLayer.bd import obtener_sesion
-from src.dataLayer.models import modeloUsuario
+from src.dataLayer.bd import SessionLocal
+from src.dataLayer.models.modeloUsuario import Usuario as UsuarioDB
 
 def crearUsuario(usuario: Usuario) -> Optional[Usuario]:
     """
@@ -32,17 +33,18 @@ def crearUsuario(usuario: Usuario) -> Optional[Usuario]:
             raise ValueError("El parámetro debe ser una instancia de Usuario")
             
         # Crear modelo de BD a partir del Pydantic model
-        usuario_db = modeloUsuario(
+        usuario_db = UsuarioDB(
             nombreDeUsuario=usuario.nombreDeUsuario,
             email=usuario.email,
             contrasenaHasheada=hasearContrasena(usuario.contrasenaHasheada)
         )
         
         # Obtener sesión y guardar
-        sesion = obtener_sesion()
+        sesion = SessionLocal()
         try:
             sesion.add(usuario_db)
             sesion.commit()
+            sesion.refresh(usuario_db)  # Refrescar para obtener el ID generado
             
             # Actualizar el modelo Pydantic con los datos guardados
             usuario.contrasenaHasheada = usuario_db.contrasenaHasheada
@@ -77,17 +79,18 @@ def obtenerUsuario(nombreDeUsuario: str = None, email: str = None) -> Optional[U
     if not nombreDeUsuario and not email:
         raise ValueError("Debe proporcionar nombreDeUsuario o email para la búsqueda")
 
-    sesion = obtener_sesion()
+    sesion = SessionLocal()
     try:
         # Construir el filtro de búsqueda
-        filtro = []
+        query = sesion.query(UsuarioDB)
+        
         if nombreDeUsuario:
-            filtro.append(modeloUsuario.nombreDeUsuario == nombreDeUsuario)
+            query = query.filter(UsuarioDB.nombreDeUsuario == nombreDeUsuario)
         if email:
-            filtro.append(modeloUsuario.email == email)
+            query = query.filter(UsuarioDB.email == email)
             
         # Realizar la búsqueda
-        usuario_db = sesion.query(modeloUsuario).filter(*filtro).first()
+        usuario_db = query.first()
         
         # Convertir el resultado a modelo Pydantic si existe
         if usuario_db:

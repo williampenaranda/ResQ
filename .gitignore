@@ -1,1 +1,5 @@
 env
+.env
+src/dataLayer/__pycache__/bd.cpython-313.pyc
+src/dataLayer/models/__pycache__/modeloUsuario.cpython-313.pyc
+src/__pycache__/main.cpython-313.pyc

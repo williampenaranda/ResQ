@@ -41,7 +41,7 @@ engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False} if es_sqlite else {},
     poolclass=StaticPool if es_sqlite else None,
-    echo=True  # Muestra las consultas SQL en la consola (útil para desarrollo)
+    echo=False  # No mostrar consultas SQL en los logs
 )
 
 # Crear la clase SessionLocal para crear sesiones de base de datos
@@ -85,10 +85,8 @@ def verificar_conexion():
         with engine.connect() as connection:
             # Ejecutar una consulta simple para verificar la conexión
             connection.execute(text("SELECT 1"))
-        print("✓ Conexión a la base de datos exitosa")
         return True
     except SQLAlchemyError as e:
-        print(f"✗ Error al conectar a la base de datos: {e}")
         raise
 
 
@@ -102,9 +100,7 @@ def crear_tablas():
     """
     try:
         Base.metadata.create_all(bind=engine)
-        print("✓ Tablas creadas exitosamente")
     except SQLAlchemyError as e:
-        print(f"✗ Error al crear las tablas: {e}")
         raise
 
 
@@ -116,10 +112,9 @@ def inicializar_base_datos():
     Raises:
         SQLAlchemyError: Si hay un error al inicializar
     """
-    print("Inicializando base de datos...")
     verificar_conexion()
     crear_tablas()
-    print("✓ Base de datos inicializada correctamente")
+    print("Base de datos lista")
 
 
 def eliminar_tablas():

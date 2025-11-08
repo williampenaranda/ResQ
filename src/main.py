@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from src.dataLayer.bd import inicializar_base_datos, engine
 from src.api.usuarios import usuarios_router
+from src.api.auth import auth_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,14 +15,13 @@ async def lifespan(app: FastAPI):
     try:
         inicializar_base_datos()
     except Exception as e:
-        print(f"✗ Error al inicializar la base de datos: {e}")
+        print(f"Error al inicializar la base de datos: {e}")
         raise
     
     yield
     
     # Shutdown: cerrar conexiones
     engine.dispose()
-    print("✓ Conexiones de base de datos cerradas")
 
 
 app = FastAPI(
@@ -32,6 +32,9 @@ app = FastAPI(
 )
 
 app.include_router(usuarios_router)
+app.include_router(auth_router)
+
+
 @app.get("/")
 def read_root():
     """Endpoint raíz para verificar que la API está funcionando."""

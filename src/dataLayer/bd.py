@@ -48,13 +48,21 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def obtener_sesion() -> Session:
+from typing import Generator
+
+def obtener_sesion() -> Generator[Session, None, None]:
     """
     Función de dependencia para obtener una sesión de base de datos.
     Útil para usar con FastAPI Dependency Injection.
     
     Yields:
-        Session: Sesión de base de datos de SQLAlchemy
+        Session: Sesión de base de datos de SQLAlchemy que se cerrará automáticamente
+        
+    Example:
+        @app.get("/usuarios")
+        def get_usuarios(db: Session = Depends(obtener_sesion)):
+            # Usar la sesión
+            return db.query(Usuario).all()
     """
     db = SessionLocal()
     try:

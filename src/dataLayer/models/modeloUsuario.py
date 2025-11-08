@@ -7,7 +7,7 @@ utilizando SQLAlchemy ORM.
 
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
@@ -20,17 +20,17 @@ def obtener_fecha_utc():
     return datetime.now(timezone.utc)
 
 
-class ModeloUsuario(Base):
+class Usuario(Base):
     """
     Modelo SQLAlchemy que representa la tabla 'usuarios' en la base de datos.
     
     Campos:
     - id: Identificador único del usuario (clave primaria, autoincremental)
-    - nombreDeUsuario: Nombre de usuario (único, no nulo)
-    - email: Email del usuario (único, no nulo)
-    - contrasenaHasheada: Contraseña hasheada con bcrypt (no nulo)
-    - fechaCreacion: Fecha y hora de creación del registro
-    - fechaActualizacion: Fecha y hora de última actualización
+    - nombreDeUsuario: Nombre de usuario (único, no nulo, indexado)
+    - email: Email del usuario (único, no nulo, indexado)
+    - contrasenaHasheada: Contraseña hasheada con bcrypt (no nulo, 60 caracteres)
+    - fechaCreacion: Fecha y hora de creación del registro (UTC)
+    - fechaActualizacion: Fecha y hora de última actualización (UTC)
     """
     
     __tablename__ = "usuarios"
@@ -54,4 +54,19 @@ class ModeloUsuario(Base):
     )
     
     def __repr__(self):
-        return f"<ModeloUsuario(id={self.id}, nombreDeUsuario='{self.nombreDeUsuario}', email='{self.email}')>"
+        """Representación segura que NO expone la contraseña."""
+        return f"<Usuario(id={self.id}, nombreDeUsuario='{self.nombreDeUsuario}', email='{self.email}')>"
+    
+    def __str__(self):
+        """Representación segura que NO expone la contraseña."""
+        return f"Usuario(id={self.id}, nombreDeUsuario='{self.nombreDeUsuario}', email='{self.email}')"
+    
+    def __eq__(self, other):
+        """Comparación segura que valida que other no sea None."""
+        if not isinstance(other, Usuario):
+            return False
+        return self.id == other.id
+    
+    def __hash__(self):
+        """Permite usar el objeto en sets y diccionarios."""
+        return hash(self.id)

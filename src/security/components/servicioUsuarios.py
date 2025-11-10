@@ -5,7 +5,6 @@ Proporciona funciones para crear, actualizar y gestionar usuarios en el sistema.
 
 from typing import Optional
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 from src.security.entities.Usuario import Usuario
 from src.security.components.servicioHash import hasearContrasena
 from src.dataLayer.bd import SessionLocal

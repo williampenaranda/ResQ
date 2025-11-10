@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import date
-from src.businessLayer.businessEntities.actores.tipoDocumento import TipoDocumento
+from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
 from typing import Optional
     
 class Persona(BaseModel):

@@ -106,6 +106,32 @@ async def solicitar_ambulancia(
 
         result = await SolicitarAmbulancia.registrarSolicitud(solicitud_be)
 
+        # Notificar a todos los clientes conectados vía WebSocket
+        from src.api.websocket import notificar_nueva_solicitud
+        
+        # Preparar datos de la solicitud para notificar
+        solicitud_notificacion = {
+            "solicitante": {
+                "id": solicitud.solicitante.id,
+                "nombre": solicitud.solicitante.nombre,
+                "apellido": solicitud.solicitante.apellido,
+                "tipoDocumento": solicitud.solicitante.tipoDocumento.value if hasattr(solicitud.solicitante.tipoDocumento, 'value') else str(solicitud.solicitante.tipoDocumento),
+                "numeroDocumento": solicitud.solicitante.numeroDocumento,
+                "padecimientos": solicitud.solicitante.padecimientos or []
+            },
+            "ubicacion": {
+                "latitud": solicitud.ubicacion.latitud,
+                "longitud": solicitud.ubicacion.longitud,
+                "fechaHora": solicitud.ubicacion.fechaHora.isoformat() if solicitud.ubicacion.fechaHora else None
+            },
+            "fechaHora": (solicitud.fechaHora or datetime.utcnow()).isoformat(),
+            "room": result["room"],
+            "server_url": result["server_url"]
+        }
+        
+        # Notificar de forma asíncrona (no bloquea la respuesta)
+        await notificar_nueva_solicitud(solicitud_notificacion)
+
         return SolicitarAmbulanciaResponse(**result)
 
     except ValueError as ve:

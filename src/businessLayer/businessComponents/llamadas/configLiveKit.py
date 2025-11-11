@@ -6,7 +6,6 @@ Centraliza la carga y validación de las variables de entorno de LiveKit.
 import os
 from dotenv import load_dotenv
 from typing import Optional
-from livekit import api
 
 # Cargar variables de entorno
 load_dotenv()
@@ -16,8 +15,8 @@ LIVEKIT_API_KEY: Optional[str] = os.getenv("LIVEKIT_API_KEY")
 LIVEKIT_API_SECRET: Optional[str] = os.getenv("LIVEKIT_API_SECRET")
 LIVEKIT_URL: Optional[str] = os.getenv("LIVEKIT_URL")
 
-# Instancia global del servicio (singleton pattern)
-_room_service: Optional[api.RoomService] = None
+# Instancia global del cliente de API (singleton pattern)
+_livekit_api: Optional[object] = None
 
 
 def validate_livekit_config() -> None:
@@ -35,24 +34,33 @@ def validate_livekit_config() -> None:
         raise ValueError("LIVEKIT_URL no está configurada en las variables de entorno")
 
 
-def get_room_service() -> api.RoomService:
+def get_room_service():
     """
-    Obtiene o crea la instancia del servicio de salas de LiveKit.
+    Obtiene o crea la instancia del cliente de API de LiveKit y retorna el servicio de salas.
     Implementa el patrón singleton para reutilizar la conexión.
     
     Returns:
-        api.RoomService: Instancia del servicio de salas
+        Instancia del servicio de salas de LiveKit (accesible a través de .aroom)
         
     Raises:
         ValueError: Si las variables de entorno no están configuradas.
     """
-    global _room_service
+    global _livekit_api
+    
+    # Importar aquí para evitar problemas de carga circular
+    from livekit import api
     
     # Validar configuración antes de crear el servicio
     validate_livekit_config()
     
-    if _room_service is None:
-        _room_service = api.RoomService(LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
+    if _livekit_api is None:
+        # Crear el cliente de API de LiveKit
+        _livekit_api = api.LiveKitAPI(
+            url=LIVEKIT_URL,
+            api_key=LIVEKIT_API_KEY,
+            api_secret=LIVEKIT_API_SECRET
+        )
     
-    return _room_service
+    # Retornar el cliente completo (el servicio de salas está en .aroom)
+    return _livekit_api
 

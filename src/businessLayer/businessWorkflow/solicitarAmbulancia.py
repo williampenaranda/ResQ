@@ -1,5 +1,5 @@
 from src.businessLayer.businessEntities.solicitud import Solicitud
-from src.businessLayer.businessComponents.llamadas.crearSala import create_custom_room
+from src.businessLayer.businessComponents.llamadas.crearSala import crearSala
 from src.businessLayer.businessComponents.llamadas.tokenLlamadas import generar_token_participante
 from src.businessLayer.businessComponents.llamadas.configLiveKit import (
     LIVEKIT_URL,
@@ -24,7 +24,7 @@ class SolicitarAmbulancia:
         nombreSala = f"emergencia-{uuid.uuid4()}"
 
         # Crear sala (máximo 2 participantes: solicitante y operador/médico)
-        await create_custom_room(nombreSala, max_participants=2)
+        await crearSala(nombreSala, max_participants=2)
 
         # Generar identidad y token con permisos de unirse y audio
         identidad, token = generar_token_participante(

@@ -9,7 +9,7 @@ from src.businessLayer.businessComponents.llamadas.configLiveKit import (
 
 def generar_token_participante(nombre: str, nombre_sala: str) -> Tuple[str, str]:
     """
-    Genera un token JWT para un participante con permisos de unirse,
+    Genera una identidad y un token JWT para un participante con permisos de unirse,
     enviar audio y recibir audio en una sala especificada de LiveKit.
 
     Args:
@@ -59,4 +59,4 @@ def generar_token_participante(nombre: str, nombre_sala: str) -> Tuple[str, str]
         .to_jwt()
     )
 
-    return token
+    return nombre, token

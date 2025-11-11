@@ -6,7 +6,6 @@ Los campos se alinean con la entidad Pydantic `Solicitante` (que hereda de `Pers
 e incluyen `padecimientos` almacenado como JSON para simplicidad.
 """
 
-from datetime import date
 from sqlalchemy import (
     Column,
     Integer,

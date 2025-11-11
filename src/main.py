@@ -4,6 +4,7 @@ from src.dataLayer.bd import inicializar_base_datos, engine
 from src.api.usuarios import usuarios_router
 from src.api.auth import auth_router
 from src.api.solicitantes import solicitantes_router
+from src.api.operadorEmergencia import operadores_emergencia_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,6 +36,7 @@ app = FastAPI(
 app.include_router(usuarios_router)
 app.include_router(auth_router)
 app.include_router(solicitantes_router)
+app.include_router(operadores_emergencia_router)
 
 @app.get("/")
 def read_root():

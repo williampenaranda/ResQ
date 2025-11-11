@@ -8,7 +8,6 @@ class Persona(BaseModel):
     nombre: str = Field(..., min_length=1)
     apellido: str = Field(..., min_length=1)
     fechaNacimiento: date
-    documento: str = Field(..., min_length=1)
     tipoDocumento: TipoDocumento
     numeroDocumento: str = Field(..., min_length=1)
     nombre2: Optional[str] = None

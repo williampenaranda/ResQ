@@ -1,6 +1,6 @@
 # ResQ API
 
-API REST desarrollada con FastAPI para el sistema ResQ. Implementa autenticación con JWT, gestión de usuarios y arquitectura en capas.
+API REST desarrollada con FastAPI para el sistema ResQ. Implementa autenticación con JWT, gestión de usuarios/solicitantes y arquitectura en capas.
 
 ## 📋 Tabla de Contenidos
 
@@ -23,7 +23,8 @@ API REST desarrollada con FastAPI para el sistema ResQ. Implementa autenticació
 - ✅ Validación de datos con Pydantic
 - ✅ Documentación automática con Swagger/OpenAPI
 - ✅ Manejo de sesiones de base de datos
-- ✅ Gestión de usuarios completa
+- ✅ Gestión de usuarios
+- ✅ Gestión de solicitantes
 
 ## 🏗️ Arquitectura
 
@@ -45,7 +46,7 @@ El proyecto sigue una **arquitectura en capas** que separa las responsabilidades
 
 1. **API Layer**: Recibe las peticiones HTTP y las enruta a los endpoints correspondientes
 2. **Security Layer**: Maneja la autenticación, validación de tokens y hash de contraseñas
-3. **Business Layer**: Contiene la lógica de negocio (actualmente vacío, preparado para futuras funcionalidades)
+3. **Business Layer**: Contiene la lógica de negocio (servicios, validaciones y orquestación)
 4. **Data Layer**: Gestiona la conexión a la base de datos y los modelos ORM
 
 ## 📁 Estructura del Proyecto
@@ -55,7 +56,8 @@ ResQ/
 ├── src/
 │   ├── api/                    # Capa de API (Endpoints REST)
 │   │   ├── auth.py            # Endpoints de autenticación
-│   │   └── usuarios.py        # Endpoints de usuarios
+│   │   ├── usuarios.py        # Endpoints de usuarios
+│   │   └── solicitantes.py    # Endpoints de solicitantes
 │   │
 │   ├── security/              # Capa de Seguridad
 │   │   ├── components/        # Servicios de seguridad
@@ -67,13 +69,14 @@ ResQ/
 │   │       └── LoginRequest.py # Modelos de autenticación
 │   │
 │   ├── businessLayer/         # Capa de Lógica de Negocio
-│   │   ├── businessComponents/
-│   │   └── businessEntities/
+│   │   ├── businessComponents/ # Servicios de aplicación (casos de uso)
+│   │   └── businessEntities/   # Entidades y Value Objects (Pydantic)
 │   │
 │   ├── dataLayer/             # Capa de Acceso a Datos
 │   │   ├── bd.py             # Configuración de base de datos
 │   │   └── models/           # Modelos SQLAlchemy
-│   │       └── modeloUsuario.py
+│   │       ├── modeloUsuario.py
+│   │       └── modeloSolicitante.py
 │   │
 │   └── main.py               # Punto de entrada de la aplicación
 │
@@ -256,6 +259,45 @@ Crea un nuevo usuario.
 }
 ```
 
+### Solicitantes
+
+#### `POST /solicitantes`
+Crea un nuevo solicitante.
+
+Ejemplo de cuerpo (resumen, ver schema en Swagger):
+```json
+{
+  "nombre": "Juan",
+  "apellido": "Pérez",
+  "fechaNacimiento": "1990-05-10",
+  "tipoDocumento": "CEDULA",
+  "numeroDocumento": "1234567890",
+  "padecimientos": ["hipertensión"]
+}
+```
+
+Respuesta (201):
+```json
+{
+  "id": 1,
+  "nombre": "Juan",
+  "apellido": "Pérez",
+  "fechaNacimiento": "1990-05-10",
+  "tipoDocumento": "CEDULA",
+  "numeroDocumento": "1234567890",
+  "padecimientos": ["hipertensión"]
+}
+```
+
+#### `GET /solicitantes/{id}`
+Retorna un solicitante por ID.
+
+#### `PUT /solicitantes/{id}`
+Actualiza campos y retorna el solicitante actualizado.
+
+#### `DELETE /solicitantes/{id}`
+Elimina un solicitante (204 No Content).
+
 ### Health Check
 
 #### `GET /`
@@ -287,6 +329,10 @@ Endpoint de health check.
 - ✅ Tokens JWT con expiración
 - ✅ Validación de datos con Pydantic
 - ✅ Variables sensibles en archivo `.env` (no versionado)
+
+Autorización en Swagger UI (modo Bearer simple):
+- Da clic en “Authorize” y pega: `Bearer <tu_token_jwt>`
+- Los endpoints protegidos usarán ese token automáticamente
 
 ## 📄 Licencia
 

@@ -11,7 +11,6 @@ API REST desarrollada con FastAPI para el sistema ResQ. Implementa autenticació
 - [Instalación](#instalación)
 - [Configuración](#configuración)
 - [Ejecución](#ejecución)
-- [Endpoints](#endpoints)
 - [Tecnologías](#tecnologías)
 
 ## ✨ Características
@@ -191,120 +190,20 @@ Una vez ejecutando la aplicación, puedes acceder a:
 - **ReDoc**: `http://localhost:8000/redoc`
 - **OpenAPI JSON**: `http://localhost:8000/openapi.json`
 
-## 🔌 Endpoints
+## 🧭 Arquitectura y Capas
 
-### Autenticación
+El proyecto sigue una arquitectura en capas para mantener separación de responsabilidades, escalabilidad y mantenibilidad:
 
-#### `POST /auth/login`
-Autentica un usuario y devuelve un token JWT.
+- API Layer (`src/api/`): Exposición HTTP (FastAPI), validación inicial y documentación.
+- Security Layer (`src/security/`): Autenticación JWT, hash de contraseñas y utilidades de seguridad.
+- Business Layer (`src/businessLayer/`): Lógica de negocio, servicios de aplicación y entidades (Pydantic).
+- Data Layer (`src/dataLayer/`): Modelos ORM (SQLAlchemy), conexión y repositorios de acceso a datos.
 
-**Request:**
-```json
-{
-  "identificador": "usuario@email.com",  // o "nombreDeUsuario"
-  "contrasena": "mi_contraseña"
-}
-```
-
-**Response:**
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer",
-  "expires_in": 86400
-}
-```
-
-#### `POST /auth/verify`
-Verifica si un token JWT es válido.
-
-**Request:**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-**Response (válido):**
-```json
-{
-  "valid": true,
-  "usuario": {
-    "nombreDeUsuario": "usuario123",
-    "email": "usuario@email.com",
-    "sub": "usuario@email.com"
-  },
-  "mensaje": "Token válido"
-}
-```
-
-### Usuarios
-
-#### `POST /usuarios/`
-Crea un nuevo usuario.
-
-**Request:**
-```json
-{
-  "nombreDeUsuario": "usuario123",
-  "email": "usuario@email.com",
-  "contrasenaHasheada": "contraseña_sin_hashear"
-}
-```
-
-**Response:**
-```json
-{
-  "mensaje": "Usuario creado correctamente"
-}
-```
-
-### Solicitantes
-
-#### `POST /solicitantes`
-Crea un nuevo solicitante.
-
-Ejemplo de cuerpo (resumen, ver schema en Swagger):
-```json
-{
-  "nombre": "Juan",
-  "apellido": "Pérez",
-  "fechaNacimiento": "1990-05-10",
-  "tipoDocumento": "CEDULA",
-  "numeroDocumento": "1234567890",
-  "padecimientos": ["hipertensión"]
-}
-```
-
-Respuesta (201):
-```json
-{
-  "id": 1,
-  "nombre": "Juan",
-  "apellido": "Pérez",
-  "fechaNacimiento": "1990-05-10",
-  "tipoDocumento": "CEDULA",
-  "numeroDocumento": "1234567890",
-  "padecimientos": ["hipertensión"]
-}
-```
-
-#### `GET /solicitantes/{id}`
-Retorna un solicitante por ID.
-
-#### `PUT /solicitantes/{id}`
-Actualiza campos y retorna el solicitante actualizado.
-
-#### `DELETE /solicitantes/{id}`
-Elimina un solicitante (204 No Content).
-
-### Health Check
-
-#### `GET /`
-Endpoint raíz para verificar que la API está funcionando.
-
-#### `GET /health`
-Endpoint de health check.
+Flujo general:
+1. La API recibe la solicitud y delega al servicio de negocio.
+2. Los servicios aplican reglas de negocio y llaman a repositorios.
+3. Los repositorios persisten/leen datos mediante SQLAlchemy.
+4. La API retorna respuestas tipadas y documentadas.
 
 ## 🛠️ Tecnologías
 

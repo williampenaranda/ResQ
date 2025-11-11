@@ -2,16 +2,16 @@ from pydantic import BaseModel
 from datetime import datetime
 from src.businessLayer.businessEntities.solicitante import Solicitante
 from src.businessLayer.businessEntities.ubicacion import Ubicacion
-from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmergencia
+from typing import Optional
 
 class Solicitud(BaseModel):
-    id: int
+    id: Optional[int] = None
     solicitante: Solicitante
     fechaHora: datetime
     ubicacion: Ubicacion
     
     # Analizadores (Getters)
-    def get_id(self) -> int:
+    def get_id(self) -> Optional[int]:
         """Retorna el ID de la emergencia."""
         return self.id
     
@@ -28,13 +28,6 @@ class Solicitud(BaseModel):
         return self.ubicacion
     
     # Modificadores (Setters)
-    def set_id(self, id: int) -> None:
-        """Establece el ID de la emergencia."""
-        if id is None:
-            raise ValueError("El ID no puede ser None")
-        if not isinstance(id, int) or id < 0:
-            raise ValueError("El ID debe ser un entero positivo")
-        self.id = id
     
     def set_solicitante(self, solicitante: Solicitante) -> None:
         """Establece el solicitante de la emergencia."""

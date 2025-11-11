@@ -4,7 +4,7 @@ from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
 from typing import Optional
     
 class Persona(BaseModel):
-    id: int
+    id: Optional[int] = None
     nombre: str = Field(..., min_length=1)
     apellido: str = Field(..., min_length=1)
     fechaNacimiento: date
@@ -14,7 +14,7 @@ class Persona(BaseModel):
     apellido2: Optional[str] = None
 
     # Analizadores (Getters)
-    def get_id(self) -> int:
+    def get_id(self) -> Optional[int]:
         """Retorna el ID de la persona."""
         return self.id
     
@@ -29,10 +29,6 @@ class Persona(BaseModel):
     def get_fecha_nacimiento(self) -> date:
         """Retorna la fecha de nacimiento de la persona."""
         return self.fechaNacimiento
-    
-    def get_documento(self) -> str:
-        """Retorna el documento de la persona."""
-        return self.documento
     
     def get_tipo_documento(self) -> TipoDocumento:
         """Retorna el tipo de documento de la persona."""
@@ -51,9 +47,6 @@ class Persona(BaseModel):
         return self.apellido2
 
     # Modificadores (Setters)
-    def set_id(self, id: int) -> None:
-        """Establece el ID de la persona."""
-        self.id = id
     
     def set_nombre(self, nombre: str) -> None:
         """Establece el nombre de la persona."""
@@ -70,12 +63,6 @@ class Persona(BaseModel):
     def set_fecha_nacimiento(self, fecha_nacimiento: date) -> None:
         """Establece la fecha de nacimiento de la persona."""
         self.fechaNacimiento = fecha_nacimiento
-    
-    def set_documento(self, documento: str) -> None:
-        """Establece el documento de la persona."""
-        if not documento or not documento.strip():
-            raise ValueError("El documento no puede estar vacío")
-        self.documento = documento.strip()
     
     def set_tipo_documento(self, tipo_documento: TipoDocumento) -> None:
         """Establece el tipo de documento de la persona."""

@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 from src.businessLayer.businessEntities.solicitud import Solicitud
 from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmergencia
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
@@ -6,7 +7,7 @@ from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPriorid
 from src.businessLayer.businessEntities.persona import Persona
 
 class Emergencia(BaseModel):
-    id: int
+    id: Optional[int] = None
     solicitud: Solicitud
     estado: EstadoEmergencia
     tipoAmbulancia: TipoAmbulancia
@@ -16,7 +17,7 @@ class Emergencia(BaseModel):
     paciente: Persona
 
     # Analizadores (Getters)
-    def get_id(self) -> int:
+    def get_id(self) -> Optional[int]:
         """Retorna el ID de la emergencia."""
         return self.id
     
@@ -49,13 +50,6 @@ class Emergencia(BaseModel):
         return self.paciente
 
     # Modificadores (Setters)
-    def set_id(self, id: int) -> None:
-        """Establece el ID de la emergencia."""
-        if id is None:
-            raise ValueError("El ID no puede ser None")
-        if not isinstance(id, int) or id < 0:
-            raise ValueError("El ID debe ser un entero positivo")
-        self.id = id
     
     def set_solicitud(self, solicitud: Solicitud) -> None:
         """Establece la solicitud de la emergencia."""

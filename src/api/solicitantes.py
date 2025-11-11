@@ -1,14 +1,16 @@
-from fastapi import APIRouter, HTTPException, status, Body, Query, Path
+from fastapi import APIRouter, HTTPException, status, Body, Query, Path, Depends
 from typing import List, Optional, Any, Dict
 from src.businessLayer.businessEntities.solicitante import Solicitante
 from src.businessLayer.businessComponents.actores.servicioSolicitante import (
     ServicioSolicitante,
 )
 from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
+from src.api.security import require_auth
 
 solicitantes_router = APIRouter(
     prefix="/solicitantes",
     tags=["solicitantes"],
+    dependencies=[Depends(require_auth)]
 )
 
 

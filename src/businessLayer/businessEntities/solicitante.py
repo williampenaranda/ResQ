@@ -1,4 +1,4 @@
-from src.businessLayer.businessEntities.actores.persona import Persona
+from src.businessLayer.businessEntities.persona import Persona
 from typing import Optional, List
 from pydantic import field_validator, Field
 

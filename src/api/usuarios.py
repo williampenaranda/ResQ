@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from src.security.entities.Usuario import Usuario
-from src.security.components.servicioUsuarios import crearUsuario
-
+from src.dataLayer.dataAccesComponets.repositorioUsuarios import crearUsuario
 usuarios_router = APIRouter(
     prefix="/usuarios",
     tags=["usuarios"]

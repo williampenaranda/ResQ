@@ -54,7 +54,6 @@ class Solicitante(Base):
     fechaNacimiento = Column(Date, nullable=False)
 
     # Documento de identidad
-    documento = Column(String(50), nullable=False)  # Campo libre si se usa
     tipoDocumento = Column(SAEnum(TipoDocumento, name="tipo_documento_enum"), nullable=False, index=True)
     numeroDocumento = Column(String(100), nullable=False, index=True)
 
@@ -75,14 +74,8 @@ class Solicitante(Base):
     )
 
     def __repr__(self):
-        return (
-            f"<Solicitante(id={self.id}, nombre='{self.nombre}', apellido='{self.apellido}', "
-            f"tipoDocumento='{self.tipoDocumento}', numeroDocumento='{self.numeroDocumento}')>"
-        )
+        return f"<Solicitante(id={self.id}, nombre='{self.nombre}', apellido='{self.apellido}', tipoDocumento='{self.tipoDocumento}', numeroDocumento='{self.numeroDocumento}')>"
 
     def __str__(self):
-        return (
-            f"Solicitante(id={self.id}, nombre='{self.nombre}', apellido='{self.apellido}', "
-            f"tipoDocumento='{self.tipoDocumento}', numeroDocumento='{self.numeroDocumento}')"
-        )
+        return f"Solicitante(id={self.id}, nombre='{self.nombre}', apellido='{self.apellido}', tipoDocumento='{self.tipoDocumento}', numeroDocumento='{self.numeroDocumento}')"
 

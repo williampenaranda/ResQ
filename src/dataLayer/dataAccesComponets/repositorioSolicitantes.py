@@ -24,7 +24,6 @@ def _mapear_be_a_db(solicitante: SolicitanteBE) -> SolicitanteDB:
         apellido=solicitante.apellido,
         apellido2=solicitante.apellido2,
         fechaNacimiento=solicitante.fechaNacimiento,
-        documento=solicitante.documento,
         tipoDocumento=solicitante.tipoDocumento,  # SAEnum acepta el Enum directamente
         numeroDocumento=solicitante.numeroDocumento,
         padecimientos=solicitante.get_padecimientos(),
@@ -39,7 +38,6 @@ def _mapear_db_a_be(db_obj: SolicitanteDB) -> SolicitanteBE:
         apellido=db_obj.apellido,
         apellido2=db_obj.apellido2,
         fechaNacimiento=db_obj.fechaNacimiento,
-        documento=db_obj.documento,
         tipoDocumento=TipoDocumento(db_obj.tipoDocumento) if not isinstance(db_obj.tipoDocumento, TipoDocumento) else db_obj.tipoDocumento,
         numeroDocumento=db_obj.numeroDocumento,
         padecimientos=db_obj.padecimientos or [],
@@ -115,7 +113,7 @@ def listar_solicitantes(limit: int = 50, offset: int = 0) -> List[SolicitanteBE]
 def actualizar_solicitante(id_solicitante: int, cambios: dict) -> Optional[SolicitanteBE]:
     """
     Actualiza campos del solicitante. `cambios` puede incluir:
-    nombre, nombre2, apellido, apellido2, fechaNacimiento, documento,
+    nombre, nombre2, apellido, apellido2, fechaNacimiento,
     tipoDocumento (TipoDocumento), numeroDocumento, padecimientos (list[str]).
     """
     if not cambios:

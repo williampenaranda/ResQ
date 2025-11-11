@@ -11,7 +11,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict
 import jwt
-from src.security.components.servicioUsuarios import obtenerUsuario
+from src.dataLayer.dataAccesComponets.repositorioUsuarios import obtenerUsuario
 from src.security.components.servicioHash import evaluarContrasena
 
 # Configuración de JWT
@@ -83,9 +83,7 @@ def autenticar_usuario(identificador: str, contrasena: str) -> Optional[Dict]:
             None si las credenciales son incorrectas
     """
     # Intentar buscar por email primero, luego por nombreDeUsuario
-    usuario = obtenerUsuario(email=identificador)
-    if not usuario:
-        usuario = obtenerUsuario(nombreDeUsuario=identificador)
+    usuario = obtenerUsuario(email=identificador) or obtenerUsuario(nombreDeUsuario=identificador)
     
     # Si no se encontró el usuario, retornar None
     if not usuario:

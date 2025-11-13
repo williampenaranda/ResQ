@@ -9,8 +9,8 @@ from src.api.security import require_auth
 
 solicitantes_router = APIRouter(
     prefix="/solicitantes",
-    tags=["solicitantes"],
-    dependencies=[Depends(require_auth)]
+    tags=["solicitantes"]
+    # dependencies=[Depends(require_auth)]
 )
 
 

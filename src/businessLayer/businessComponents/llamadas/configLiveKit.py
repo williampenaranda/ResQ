@@ -19,6 +19,7 @@ LIVEKIT_URL: Optional[str] = os.getenv("LIVEKIT_URL")
 # Instancia global del cliente de API (singleton pattern)
 _livekit_api: Optional[object] = None
 _livekit_health_checked: bool = False
+_livekit_effective_url: Optional[str] = None
 
 
 def validate_livekit_config() -> None:
@@ -55,15 +56,17 @@ def get_room_service():
     # Validar configuración antes de crear el servicio
     validate_livekit_config()
     
+    base_url = _livekit_effective_url or _normalize_livekit_url(LIVEKIT_URL)
+
     if _livekit_api is None:
         # Crear el cliente de API de LiveKit
         _livekit_api = api.LiveKitAPI(
-            url=LIVEKIT_URL,
+            url=base_url,
             api_key=LIVEKIT_API_KEY,
             api_secret=LIVEKIT_API_SECRET
         )
     
-    # Retornar el cliente completo (el servicio de salas está en .aroom)
+    # Retornar el cliente completo (el servicio de salas está en .room)
     return _livekit_api
 
 
@@ -79,7 +82,7 @@ async def ensure_livekit_healthcheck(timeout: float = 5.0) -> None:
         ValueError: Si la configuración de LiveKit no es válida.
         RuntimeError: Si el servidor de LiveKit no responde satisfactoriamente.
     """
-    global _livekit_health_checked
+    global _livekit_health_checked, _livekit_effective_url
 
     if _livekit_health_checked:
         return
@@ -89,21 +92,9 @@ async def ensure_livekit_healthcheck(timeout: float = 5.0) -> None:
     try:
         from aiohttp import ClientSession, TCPConnector, client_exceptions
 
-        parsed = urlparse(LIVEKIT_URL or "")
+        normalized_base = _normalize_livekit_url(LIVEKIT_URL)
 
-        scheme = parsed.scheme.lower() if parsed.scheme else ""
-        if scheme in ("ws", "wss"):
-            scheme = "http" if scheme == "ws" else "https"
-        if scheme not in ("http", "https"):
-            scheme = "http"
-
-        netloc = parsed.netloc or parsed.path
-        if not netloc:
-            netloc = "127.0.0.1:7880"
-
-        normalized_base = urlunparse((scheme, netloc, "", "", "", ""))
-
-        async def _check(base_url: str) -> None:
+        async def _check(base_url: str) -> str:
             base_parsed = urlparse(base_url)
             base_scheme = base_parsed.scheme or "http"
             connector = TCPConnector(ssl=False) if base_scheme == "http" else None
@@ -123,7 +114,7 @@ async def ensure_livekit_healthcheck(timeout: float = 5.0) -> None:
                                 raise RuntimeError(
                                     f"LiveKit base endpoint returned unexpected body: {body}"
                                 )
-                        return
+                        return base_url
 
                     if response.status != 200:
                         body = await response.text()
@@ -145,17 +136,47 @@ async def ensure_livekit_healthcheck(timeout: float = 5.0) -> None:
                                 f"LiveKit healthcheck returned unexpected body: {body}"
                             )
 
+            return base_url
+
         try:
-            await _check(normalized_base)
+            effective_url = await _check(normalized_base)
         except client_exceptions.ClientConnectorSSLError as ssl_error:
             message = str(ssl_error).upper()
             if "WRONG_VERSION_NUMBER" in message and normalized_base.startswith("https://"):
                 fallback_base = normalized_base.replace("https://", "http://", 1)
-                await _check(fallback_base)
+                effective_url = await _check(fallback_base)
             else:
                 raise
+        _livekit_effective_url = effective_url
+        _livekit_health_checked = True
+        return
     except Exception as exc:
         raise RuntimeError(f"No se pudo verificar el estado de LiveKit: {exc}") from exc
 
     _livekit_health_checked = True
+
+
+def _normalize_livekit_url(raw_url: Optional[str]) -> str:
+    """
+    Normaliza la URL de LiveKit para garantizar que use esquemas soportados por la API.
+
+    Args:
+        raw_url: URL original configurada para LiveKit.
+
+    Returns:
+        Una URL con esquema http(s) y host:puerto válidos.
+    """
+    parsed = urlparse(raw_url or "")
+
+    scheme = parsed.scheme.lower() if parsed.scheme else ""
+    if scheme in ("ws", "wss"):
+        scheme = "http" if scheme == "ws" else "https"
+    if scheme not in ("http", "https"):
+        scheme = "http"
+
+    netloc = parsed.netloc or parsed.path
+    if not netloc:
+        netloc = "127.0.0.1:7880"
+
+    return urlunparse((scheme, netloc, "", "", "", ""))
 

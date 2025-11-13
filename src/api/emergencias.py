@@ -93,16 +93,26 @@ async def solicitar_ambulancia(
         from src.businessLayer.businessEntities.ubicacion import Ubicacion
         from src.businessLayer.businessEntities.solicitud import Solicitud
 
-        solicitante_be = Solicitante(**solicitud.solicitante.model_dump())
-        ubicacion_be = Ubicacion(**solicitud.ubicacion.model_dump())
+        solicitante_be = Solicitante.model_validate(
+            solicitud.solicitante.model_dump() if hasattr(solicitud.solicitante, "model_dump") else solicitud.solicitante
+        )
+        ubicacion_be = Ubicacion.model_validate(
+            solicitud.ubicacion.model_dump() if hasattr(solicitud.ubicacion, "model_dump") else solicitud.ubicacion
+        )
+        solicitante_id = (
+            getattr(solicitud.solicitante, "id", None)
+            if not isinstance(solicitud.solicitante, dict)
+            else solicitud.solicitante.get("id")
+        )
+
         solicitud_be = Solicitud(
-            id=solicitud.solicitante.id,  # o un ID temporal si aplica
+            id=solicitante_id or solicitante_be.id,
             solicitante=solicitante_be,
             fechaHora=solicitud.fechaHora or datetime.utcnow(),
             ubicacion=ubicacion_be,
         )
 
-        result = await SolicitarAmbulancia.registrarSolicitud(solicitud_be)
+        result = await SolicitarAmbulancia.registrarSolicitud(solicitud_be.model_dump(mode="json"))
 
         # Notificar a todos los clientes conectados vía WebSocket
         from src.api.websocket import notificar_nueva_solicitud

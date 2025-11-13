@@ -49,7 +49,7 @@ async def crearSala(nombreSala: str, max_participants: int) -> api.Room:
     svc = get_room_service()
     
     # Definir las opciones de la sala
-    options = api.RoomOptions(
+    request = api.CreateRoomRequest(
         name=nombreSala,
         max_participants=max_participants,
     )
@@ -58,24 +58,20 @@ async def crearSala(nombreSala: str, max_participants: int) -> api.Room:
         logger.info(f"Intentando crear sala '{nombreSala}' con máximo {max_participants} participantes")
         
         # Llamar a la API para crear la sala
-        room: api.Room = await svc.aroom.create_room(options)
+        room: api.Room = await svc.room.create_room(request)
         
         logger.info(f"Sala '{nombreSala}' creada exitosamente. SID: {room.sid}")
         return room
         
-    except api.exceptions.AlreadyExists:
-        logger.warning(f"La sala '{nombreSala}' ya existe")
-        # Opción 1: Relanzar la excepción para que el llamador decida qué hacer
-        raise
-        # Opción 2: Si quieres obtener la sala existente en lugar de fallar:
-        # room = await svc.aroom.get_room(room_name)
-        # logger.info(f"Retornando sala existente '{room_name}'. SID: {room.sid}")
-        # return room
-        
-    except api.exceptions.InvalidArgument as e:
-        logger.error(f"Argumentos inválidos para crear sala '{nombreSala}': {e}")
-        raise ValueError(f"Argumentos inválidos: {e}") from e
-        
+    except api.TwirpError as e:
+        if e.code == api.TwirpErrorCode.ALREADY_EXISTS:
+            logger.warning(f"La sala '{nombreSala}' ya existe")
+            raise
+        if e.code == api.TwirpErrorCode.INVALID_ARGUMENT:
+            logger.error(f"Argumentos inválidos para crear sala '{nombreSala}': {e}")
+            raise ValueError(f"Argumentos inválidos: {e}") from e
+        logger.error(f"Error al crear sala '{nombreSala}' (Twirp {e.code}): {e}")
+        raise RuntimeError(f"Error al crear la sala: {str(e)}") from e
     except Exception as e:
         logger.error(f"Error inesperado al crear sala '{nombreSala}': {e}", exc_info=True)
         raise RuntimeError(f"Error al crear la sala: {str(e)}") from e
@@ -104,11 +100,18 @@ async def obtenerSala(nombreSala: str) -> Optional[api.Room]:
     
     try:
         svc = get_room_service()
-        room = await svc.aroom.get_room(nombreSala)
-        return room
-    except api.exceptions.NotFound:
+        response = await svc.room.list_rooms(api.ListRoomsRequest(names=[nombreSala]))
+        for room in response.rooms:
+            if room.name == nombreSala:
+                return room
         logger.info(f"Sala '{nombreSala}' no encontrada")
         return None
+    except api.TwirpError as e:
+        if e.code == api.TwirpErrorCode.NOT_FOUND:
+            logger.info(f"Sala '{nombreSala}' no encontrada")
+            return None
+        logger.error(f"Error al obtener sala '{nombreSala}' (Twirp {e.code}): {e}", exc_info=True)
+        raise RuntimeError(f"Error al obtener la sala: {str(e)}") from e
     except Exception as e:
         logger.error(f"Error al obtener sala '{nombreSala}': {e}", exc_info=True)
         raise RuntimeError(f"Error al obtener la sala: {str(e)}") from e

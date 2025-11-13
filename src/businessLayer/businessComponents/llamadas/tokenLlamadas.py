@@ -1,5 +1,6 @@
 from typing import Tuple
 import uuid
+import datetime
 from livekit import api
 from src.businessLayer.businessComponents.llamadas.configLiveKit import (
     LIVEKIT_API_KEY,
@@ -38,13 +39,13 @@ def generar_token_participante(nombre: str, nombre_sala: str) -> Tuple[str, str]
     # Verificar que las variables de entorno necesarias estén configuradas
     validate_livekit_config()
 
-    # Generar una identidad única (p. ej., combinación de nombre con un UUID corto)
-
+    # Generar una identidad (LiveKit requiere identidad única por sala)
+    identidad = f"{nombre}-{uuid.uuid4().hex[:8]}"
 
     # Crear el token con permisos solo de unión y audio (hablar/escuchar)
     token = (
         api.AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
-        .with_identity(nombre)
+        .with_identity(identidad)
         .with_grants(
             api.VideoGrants(
                 room_join=True,
@@ -52,11 +53,11 @@ def generar_token_participante(nombre: str, nombre_sala: str) -> Tuple[str, str]
                 can_publish=True,          # Permitir compartir audio
                 can_subscribe=True,        # Permitir escuchar
                 can_publish_data=False,    # Opcional: deshabilitar data channels si no se necesitan
-                can_publish_sources=("microphone",),  # Limitar a audio
-                can_subscribe_sources=("microphone",),# Recibir solo audio
+                can_publish_sources=["microphone"],  # Limitar a audio
             )
         )
+        .with_ttl(datetime.timedelta(hours=1))
         .to_jwt()
     )
 
-    return nombre, token
+    return identidad, token

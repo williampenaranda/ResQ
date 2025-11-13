@@ -18,7 +18,7 @@ manager = ConnectionManager()
 manager_emergencias = ConnectionManager()
 
 
-async def notificar_nueva_solicitud(solicitud: Solicitud):
+async def notificar_nueva_solicitud(solicitud: Solicitud | dict):
     """
     Notifica a todos los clientes conectados al WebSocket de emergencias
     sobre una nueva solicitud recibida.
@@ -26,9 +26,16 @@ async def notificar_nueva_solicitud(solicitud: Solicitud):
     Args:
         solicitud_data: Diccionario con la información de la solicitud
     """
+    if isinstance(solicitud, Solicitud):
+        data = solicitud.model_dump()
+    elif hasattr(solicitud, "model_dump"):
+        data = solicitud.model_dump()
+    else:
+        data = solicitud
+
     message = json.dumps({
         "type": "nueva_solicitud",
-        "data": solicitud.model_dump(),
+        "data": data,
         "timestamp": datetime.now(timezone.utc).isoformat()
     })
     

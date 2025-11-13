@@ -1,4 +1,4 @@
-from src.api.websocket import notificar_nueva_solicitud
+from datetime import datetime
 from src.businessLayer.businessEntities.solicitud import Solicitud
 from src.businessLayer.businessComponents.llamadas.crearSala import crearSala
 from src.businessLayer.businessComponents.llamadas.tokenLlamadas import generar_token_participante
@@ -11,11 +11,17 @@ import uuid
 class SolicitarAmbulancia:
 
     @staticmethod
-    async def registrarSolicitud(solicitud: Solicitud) -> dict:
+    async def registrarSolicitud(solicitud: Solicitud | dict) -> dict:
+        if isinstance(solicitud, dict):
+            solicitud_obj = Solicitud.model_validate(solicitud)
+            solicitud_dict = solicitud
+        else:
+            solicitud_obj = solicitud
+            solicitud_dict = solicitud.model_dump(mode="json")
         # Validaciones básicas
-        if solicitud is None:
+        if solicitud_obj is None:
             raise ValueError("La solicitud no puede ser None")
-        if not solicitud.solicitante or not solicitud.solicitante.nombre:
+        if not solicitud_obj.solicitante or not solicitud_obj.solicitante.nombre:
             raise ValueError("La solicitud debe incluir un solicitante con nombre")
 
         # Validar configuración de LiveKit antes de operar
@@ -29,16 +35,14 @@ class SolicitarAmbulancia:
 
         # Generar identidad y token con permisos de unirse y audio
         identidad, token = generar_token_participante(
-            nombre=solicitud.solicitante.nombre,
+            nombre=solicitud_obj.solicitante.nombre,
             nombre_sala=nombreSala
         )
-
-        # Notificar a todos los clientes conectados vía WebSocket
-        await notificar_nueva_solicitud(solicitud)
 
         return {
             "room": nombreSala,
             "token": token,
             "identity": identidad,
             "server_url": LIVEKIT_URL,
+            "solicitud": solicitud_dict,
         }

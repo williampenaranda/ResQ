@@ -1,3 +1,4 @@
+from src.api.websocket import notificar_nueva_solicitud
 from src.businessLayer.businessEntities.solicitud import Solicitud
 from src.businessLayer.businessComponents.llamadas.crearSala import crearSala
 from src.businessLayer.businessComponents.llamadas.tokenLlamadas import generar_token_participante
@@ -31,6 +32,9 @@ class SolicitarAmbulancia:
             nombre=solicitud.solicitante.nombre,
             nombre_sala=nombreSala
         )
+
+        # Notificar a todos los clientes conectados vía WebSocket
+        await notificar_nueva_solicitud(solicitud)
 
         return {
             "room": nombreSala,

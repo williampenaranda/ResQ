@@ -7,7 +7,8 @@ Este módulo proporciona endpoints WebSocket para comunicación en tiempo real.
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from src.comunication.conexionWebsocket import ConnectionManager
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+from src.businessLayer.businessEntities.solicitud import Solicitud
 
 # Crear instancias del ConnectionManager
 # Manager general para el endpoint básico
@@ -17,7 +18,7 @@ manager = ConnectionManager()
 manager_emergencias = ConnectionManager()
 
 
-async def notificar_nueva_solicitud(solicitud_data: dict):
+async def notificar_nueva_solicitud(solicitud: Solicitud):
     """
     Notifica a todos los clientes conectados al WebSocket de emergencias
     sobre una nueva solicitud recibida.
@@ -27,8 +28,8 @@ async def notificar_nueva_solicitud(solicitud_data: dict):
     """
     message = json.dumps({
         "type": "nueva_solicitud",
-        "data": solicitud_data,
-        "timestamp": datetime.utcnow().isoformat()
+        "data": solicitud.model_dump(),
+        "timestamp": datetime.now(timezone.utc).isoformat()
     })
     
     # Broadcast a todos los conectados al endpoint de emergencias

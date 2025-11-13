@@ -33,3 +33,12 @@ class ConnectionManager:
                 self.disconnect(connection)
             except Exception:
                 pass  # Ya no está en la lista o ya fue removida
+    
+    def get_active_connections_count(self) -> int:
+        """
+        Retorna el número de conexiones activas.
+        
+        Returns:
+            int: Número de conexiones WebSocket activas
+        """
+        return len(self.active_connections)

@@ -17,7 +17,6 @@ class SolicitanteRequest(BaseModel):
     nombre: str = Field(..., min_length=1, description="Primer nombre")
     apellido: str = Field(..., min_length=1, description="Primer apellido")
     fechaNacimiento: datetime = Field(..., description="Fecha de nacimiento")
-    documento: str = Field(..., min_length=1, description="Documento")
     tipoDocumento: TipoDocumento = Field(..., description="Tipo de documento")
     numeroDocumento: str = Field(..., min_length=1, description="Número de documento")
     nombre2: Optional[str] = Field(None, description="Segundo nombre")

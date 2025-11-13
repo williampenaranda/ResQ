@@ -31,7 +31,6 @@ class Solicitante(Base):
     - nombre, nombre2: Nombres (nombre2 opcional)
     - apellido, apellido2: Apellidos (apellido2 opcional)
     - fechaNacimiento: Fecha de nacimiento
-    - documento: Tipo genérico de documento (texto)
     - tipoDocumento: Tipo de documento (CC, CE, etc.) almacenado como texto
     - numeroDocumento: Número del documento
     - padecimientos: Lista de padecimientos (JSON)

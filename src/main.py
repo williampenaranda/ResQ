@@ -7,6 +7,7 @@ from src.api.solicitantes import solicitantes_router
 from src.api.operadorEmergencia import operadores_emergencia_router
 from src.api.websocket import websocket_router
 from src.api.emergencias import emergencias_router
+from src.businessLayer.businessComponents.llamadas.configLiveKit import ensure_livekit_healthcheck
 from src.api.atenderEmergencias import atender_emergencias_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,6 +23,7 @@ async def lifespan(app: FastAPI):
         print(f"Error al inicializar la base de datos: {e}")
         raise
     
+    await ensure_livekit_healthcheck()
     yield
     
     # Shutdown: cerrar conexiones

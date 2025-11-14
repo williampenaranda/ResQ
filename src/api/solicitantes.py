@@ -54,6 +54,29 @@ def obtener_solicitante(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+@solicitantes_router.get(
+    "/buscar/documento",
+    response_model=Solicitante,
+    summary="Obtener solicitante por número de documento",
+)
+def obtener_solicitante_por_numero_documento(
+    numero_documento: str = Query(..., description="Número de documento del solicitante"),
+):
+    try:
+        encontrado = ServicioSolicitante.obtener_por_numero_documento(numero_documento)
+        if not encontrado:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Solicitante no encontrado")
+        return encontrado
+    except HTTPException:
+        # Re-lanzar HTTPException sin modificar (FastAPI la maneja automáticamente)
+        raise
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except RuntimeError as re:
+        # Errores de base de datos desde el repositorio
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(re))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @solicitantes_router.get(
     "",

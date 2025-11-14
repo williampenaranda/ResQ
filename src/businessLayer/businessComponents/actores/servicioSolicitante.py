@@ -38,14 +38,10 @@ class ServicioSolicitante:
         return repo_obtener_por_id(id_solicitante)
 
     @staticmethod
-    def obtener_por_documento(tipo: TipoDocumento, numero: str) -> Optional[Solicitante]:
-        if isinstance(tipo, str):
-            tipo = TipoDocumento(tipo)
-        if not isinstance(tipo, TipoDocumento):
-            raise ValueError("tipoDocumento inválido")
-        if not numero or not isinstance(numero, str) or not numero.strip():
-            raise ValueError("numeroDocumento inválido")
-        return repo_obtener_por_documento(tipo, numero.strip())
+    def obtener_por_numero_documento(numero_documento: str) -> Optional[Solicitante]:
+        if not numero_documento or not isinstance(numero_documento, str) or not numero_documento.strip():
+            raise ValueError("numero_documento inválido")
+        return repo_obtener_por_documento(numero_documento.strip())
 
     @staticmethod
     def listar(limit: int = 50, offset: int = 0) -> List[Solicitante]:

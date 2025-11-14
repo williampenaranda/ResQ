@@ -8,6 +8,7 @@ la entidad Pydantic `Solicitante` de la capa de negocio.
 from typing import List, Optional
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from src.dataLayer.bd import SessionLocal
 from src.dataLayer.models.modeloSolicitante import Solicitante as SolicitanteDB
@@ -82,16 +83,33 @@ def obtener_solicitante_por_id(id_solicitante: int) -> Optional[SolicitanteBE]:
         sesion.close()
 
 
-def obtener_solicitante_por_documento(tipo: TipoDocumento, numero: str) -> Optional[SolicitanteBE]:
+def obtener_solicitante_por_documento(numero: str, tipo: Optional[TipoDocumento] = None) -> Optional[SolicitanteBE]:
+    """
+    Obtiene un solicitante por número de documento.
+    Si se proporciona el tipo, busca por ambos campos.
+    Si solo se proporciona el número, busca solo por número (puede haber múltiples resultados, retorna el primero).
+    """
     if not numero or not numero.strip():
         raise ValueError("El número de documento es requerido")
     sesion: Session = SessionLocal()
     try:
-        db_obj = (
-            sesion.query(SolicitanteDB)
-            .filter(SolicitanteDB.tipoDocumento == tipo, SolicitanteDB.numeroDocumento == numero.strip())
-            .first()
+        # Normalizar el número de documento (eliminar espacios)
+        numero_normalizado = numero.strip()
+        # Primero intentar búsqueda directa (más eficiente)
+        query = sesion.query(SolicitanteDB).filter(
+            SolicitanteDB.numeroDocumento == numero_normalizado
         )
+        if tipo is not None:
+            query = query.filter(SolicitanteDB.tipoDocumento == tipo)
+        db_obj = query.first()
+        # Si no se encuentra, intentar con trim para manejar espacios en la BD
+        if db_obj is None:
+            query = sesion.query(SolicitanteDB).filter(
+                func.trim(SolicitanteDB.numeroDocumento) == numero_normalizado
+            )
+            if tipo is not None:
+                query = query.filter(SolicitanteDB.tipoDocumento == tipo)
+            db_obj = query.first()
         return _mapear_db_a_be(db_obj) if db_obj else None
     except SQLAlchemyError as e:
         raise RuntimeError(f"Error al obtener solicitante por documento: {e}")

@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class Ubicacion(BaseModel):
+    id: int | None
     latitud: float
     longitud: float
     fechaHora: datetime

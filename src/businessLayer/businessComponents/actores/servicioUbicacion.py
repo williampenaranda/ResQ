@@ -20,6 +20,7 @@ class ServicioUbicacion:
         """
         Crea una nueva ubicación.
         Retorna la Ubicacion con id asignado o None si hay error.
+        El ID se ignora si se proporciona, ya que se genera automáticamente.
         """
         if not isinstance(ubicacion, Ubicacion):
             raise ValueError("El parámetro debe ser una instancia de Ubicacion")
@@ -29,6 +30,8 @@ class ServicioUbicacion:
             raise ValueError("La latitud debe estar entre -90 y 90 grados")
         if ubicacion.longitud < -180 or ubicacion.longitud > 180:
             raise ValueError("La longitud debe estar entre -180 y 180 grados")
+        
+        # El repositorio ignora el ID automáticamente, se genera en la BD
         return repo_crear_ubicacion(ubicacion)
 
     @staticmethod

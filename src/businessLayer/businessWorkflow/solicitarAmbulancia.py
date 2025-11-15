@@ -1,4 +1,6 @@
 from datetime import datetime
+from src.dataLayer.dataAccesComponets.repositorioSolicitudes import crear_solicitud as repo_crear_solicitud
+from src.dataLayer.dataAccesComponets.repositorioUbicacion import crear_ubicacion as repo_crear_ubicacion
 from src.businessLayer.businessEntities.solicitud import Solicitud
 from src.businessLayer.businessComponents.llamadas.crearSala import crearSala
 from src.businessLayer.businessComponents.llamadas.tokenLlamadas import generar_token_participante
@@ -23,6 +25,18 @@ class SolicitarAmbulancia:
             raise ValueError("La solicitud no puede ser None")
         if not solicitud_obj.solicitante or not solicitud_obj.solicitante.nombre:
             raise ValueError("La solicitud debe incluir un solicitante con nombre")
+
+        # Si la ubicación no tiene ID, crearla primero en la base de datos
+        if not solicitud_obj.ubicacion.id:
+            ubicacion_creada = repo_crear_ubicacion(solicitud_obj.ubicacion)
+            if ubicacion_creada is None:
+                raise ValueError("Error al crear la ubicación")
+            # Actualizar la solicitud con la ubicación que tiene ID
+            solicitud_obj.ubicacion = ubicacion_creada
+
+        solicitud_creada = repo_crear_solicitud(solicitud_obj)
+        if solicitud_creada is None:
+            raise ValueError("Error al crear la solicitud")
 
         # Validar configuración de LiveKit antes de operar
         validate_livekit_config()

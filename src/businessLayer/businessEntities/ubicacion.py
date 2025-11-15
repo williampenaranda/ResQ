@@ -1,8 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Optional
 
 class Ubicacion(BaseModel):
-    id: int | None
+    id: Optional[int] = Field(default=None, description="ID de la ubicación (se genera automáticamente)")
     latitud: float
     longitud: float
     fechaHora: datetime

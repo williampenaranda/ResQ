@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Body, Query, Path, Depends
 from typing import List, Optional, Any, Dict
+from pydantic import BaseModel, Field
+from datetime import datetime
 from src.businessLayer.businessEntities.ubicacion import Ubicacion
 from src.businessLayer.businessComponents.actores.servicioUbicacion import (
     ServicioUbicacion,
@@ -13,16 +15,30 @@ ubicaciones_router = APIRouter(
 )
 
 
+class UbicacionCreate(BaseModel):
+    """Modelo para crear una ubicación sin ID (se genera automáticamente)"""
+    latitud: float = Field(..., ge=-90.0, le=90.0, description="Latitud GPS")
+    longitud: float = Field(..., ge=-180.0, le=180.0, description="Longitud GPS")
+    fechaHora: datetime = Field(..., description="Fecha y hora de la ubicación")
+
+
 @ubicaciones_router.post(
     "",
     response_model=Ubicacion,
     status_code=status.HTTP_201_CREATED,
     summary="Crear ubicación",
-    description="Crea una nueva ubicación y retorna la ubicación creada con su ID asignado.",
+    description="Crea una nueva ubicación y retorna la ubicación creada con su ID asignado automáticamente. El ID se genera en la base de datos.",
 )
-def crear_ubicacion(ubicacion: Ubicacion = Body(...)):
+def crear_ubicacion(ubicacion: UbicacionCreate = Body(...)):
     try:
-        creada = ServicioUbicacion.crear(ubicacion)
+        # Convertir el modelo de request a la entidad de negocio sin ID
+        ubicacion_be = Ubicacion(
+            id=None,  # El ID se genera automáticamente
+            latitud=ubicacion.latitud,
+            longitud=ubicacion.longitud,
+            fechaHora=ubicacion.fechaHora
+        )
+        creada = ServicioUbicacion.crear(ubicacion_be)
         if creada is None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,

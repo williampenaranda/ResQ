@@ -17,10 +17,15 @@ from src.businessLayer.businessEntities.ubicacion import Ubicacion as UbicacionB
 # ========================= Helpers de mapeo =========================
 
 def _mapear_be_a_db(ubicacion: UbicacionBE) -> UbicacionDB:
+    """
+    Mapea una Ubicacion de la capa de negocio a la capa de datos.
+    No incluye el ID ya que se genera automáticamente en la base de datos.
+    """
     return UbicacionDB(
         latitud=ubicacion.get_latitud(),
         longitud=ubicacion.get_longitud(),
         fechaHora=ubicacion.get_fecha_hora()
+        # No se incluye el ID, se genera automáticamente
     )
 
 

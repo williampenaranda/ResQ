@@ -21,7 +21,7 @@ class Usuario(BaseModel):
     nombreDeUsuario: str = Field(..., min_length=1)
     email: EmailStr
     contrasenaHasheada: str = Field(..., min_length=1)
-    tipoUsuario: TipoUsuario
+    tipoUsuario: Optional[TipoUsuario] = None
     
 
     # Normalizar/validar campos simples

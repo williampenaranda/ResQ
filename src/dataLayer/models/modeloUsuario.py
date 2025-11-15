@@ -6,8 +6,9 @@ utilizando SQLAlchemy ORM.
 """
 
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint
+from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import declarative_base
+from sqlalchemy import Enum as SAEnum
 
 Base = declarative_base()
 
@@ -29,6 +30,8 @@ class Usuario(Base):
     - nombreDeUsuario: Nombre de usuario (único, no nulo, indexado)
     - email: Email del usuario (único, no nulo, indexado)
     - contrasenaHasheada: Contraseña hasheada con bcrypt (no nulo, 60 caracteres)
+    - id_persona: ID de la persona asociada (opcional, puede ser null)
+    - tipoUsuario: Tipo de usuario (Enum: OPERADOR_AMBULANCIA, OPERADOR_EMERGENCIA, ADMINISTRADOR)
     - fechaCreacion: Fecha y hora de creación del registro (UTC)
     - fechaActualizacion: Fecha y hora de última actualización (UTC)
     """
@@ -42,6 +45,12 @@ class Usuario(Base):
     nombreDeUsuario = Column(String(50), nullable=False, unique=True, index=True)
     email = Column(String(255), nullable=False, unique=True, index=True)
     contrasenaHasheada = Column(String(60), nullable=False)  # bcrypt genera hashes de 60 caracteres
+    
+    # Relación con persona (opcional)
+    id_persona = Column(Integer, nullable=True, index=True)
+    
+    # Tipo de usuario
+    tipoUsuario = Column(String(50), nullable=True)
     
     # Timestamps
     fechaCreacion = Column(DateTime(timezone=True), default=obtener_fecha_utc, nullable=False)

@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Body, Query, Path, Depends
 from typing import List, Optional, Any, Dict
+from pydantic import BaseModel, Field
+from datetime import date
 from src.businessLayer.businessEntities.solicitante import Solicitante
 from src.businessLayer.businessComponents.actores.servicioSolicitante import (
     ServicioSolicitante,
@@ -14,6 +16,18 @@ solicitantes_router = APIRouter(
 )
 
 
+class SolicitanteCreate(BaseModel):
+    """Modelo de request para crear un solicitante (sin id)."""
+    nombre: str = Field(..., min_length=1)
+    apellido: str = Field(..., min_length=1)
+    fechaNacimiento: date
+    tipoDocumento: TipoDocumento
+    numeroDocumento: str = Field(..., min_length=1)
+    nombre2: Optional[str] = None
+    apellido2: Optional[str] = None
+    padecimientos: Optional[List[str]] = Field(default_factory=list)
+
+
 @solicitantes_router.post(
     "",
     response_model=Solicitante,
@@ -21,8 +35,20 @@ solicitantes_router = APIRouter(
     summary="Crear solicitante",
     description="Crea un nuevo solicitante y retorna el solicitante creado con su ID asignado.",
 )
-def crear_solicitante(solicitante: Solicitante = Body(...)):
+def crear_solicitante(solicitante_data: SolicitanteCreate = Body(...)):
     try:
+        # Convertir el modelo de request a Solicitante (sin id, se asignará en la BD)
+        solicitante = Solicitante(
+            id=None,
+            nombre=solicitante_data.nombre,
+            apellido=solicitante_data.apellido,
+            fechaNacimiento=solicitante_data.fechaNacimiento,
+            tipoDocumento=solicitante_data.tipoDocumento,
+            numeroDocumento=solicitante_data.numeroDocumento,
+            nombre2=solicitante_data.nombre2,
+            apellido2=solicitante_data.apellido2,
+            padecimientos=solicitante_data.padecimientos,
+        )
         creado = ServicioSolicitante.crear(solicitante)
         if creado is None:
             raise HTTPException(

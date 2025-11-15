@@ -55,7 +55,7 @@ class OperadorAmbulancia(Base):
     numeroDocumento = Column(String(100), nullable=False, index=True)
 
     # Datos laborales
-    disponibilidad = Column(Boolean, nullable=False, default=True)
+    disponibilidad = Column(Boolean, nullable=False, default=False)
     licencia = Column(String(100), nullable=False)
 
     # Timestamps

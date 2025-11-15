@@ -1,7 +1,10 @@
 from fastapi import APIRouter, HTTPException, status, Body, Query, Path, Depends
 from typing import List, Any, Dict, Optional
+from pydantic import BaseModel, Field
+from datetime import date
 
 from src.businessLayer.businessEntities.operadorEmergencia import OperadorEmergencia
+from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
 from src.businessLayer.businessComponents.actores.servicioOperadorEmergencia import (
     ServicioOperadorEmergencia,
 )
@@ -14,6 +17,18 @@ operadores_emergencia_router = APIRouter(
 )
 
 
+class OperadorEmergenciaCreate(BaseModel):
+    """Modelo de request para crear un operador de emergencia (sin id ni disponibilidad)."""
+    nombre: str = Field(..., min_length=1)
+    apellido: str = Field(..., min_length=1)
+    fechaNacimiento: date
+    tipoDocumento: TipoDocumento
+    numeroDocumento: str = Field(..., min_length=1)
+    nombre2: Optional[str] = None
+    apellido2: Optional[str] = None
+    turno: str = Field(..., min_length=1)
+
+
 @operadores_emergencia_router.post(
     "",
     response_model=OperadorEmergencia,
@@ -21,8 +36,21 @@ operadores_emergencia_router = APIRouter(
     summary="Crear operador de emergencia",
     description="Crea un nuevo operador de emergencia y retorna el recurso creado con su ID asignado.",
 )
-def crear_operador(operador: OperadorEmergencia = Body(...)):
+def crear_operador(operador_data: OperadorEmergenciaCreate = Body(...)):
     try:
+        # Convertir el modelo de request a OperadorEmergencia (sin id, disponibilidad por defecto False)
+        operador = OperadorEmergencia(
+            id=None,
+            nombre=operador_data.nombre,
+            apellido=operador_data.apellido,
+            fechaNacimiento=operador_data.fechaNacimiento,
+            tipoDocumento=operador_data.tipoDocumento,
+            numeroDocumento=operador_data.numeroDocumento,
+            nombre2=operador_data.nombre2,
+            apellido2=operador_data.apellido2,
+            disponibilidad=False,
+            turno=operador_data.turno,
+        )
         creado = ServicioOperadorEmergencia.crear(operador)
         if creado is None:
             raise HTTPException(

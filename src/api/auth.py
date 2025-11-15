@@ -77,8 +77,10 @@ async def verify_token(token_request: TokenRequest):
     
     # Extraer información del usuario del payload
     usuario_info = {
+        "id": payload.get("id"),
         "nombreDeUsuario": payload.get("nombreDeUsuario"),
         "email": payload.get("email"),
+        "tipoUsuario": payload.get("tipoUsuario"),
         "sub": payload.get("sub")
     }
     

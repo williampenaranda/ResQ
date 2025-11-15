@@ -36,8 +36,10 @@ def generar_token(usuario_data: Dict) -> str:
     # Payload del token
     payload = {
         "sub": usuario_data.get("email") or usuario_data.get("nombreDeUsuario"),  # Subject (identificador)
+        "id": usuario_data.get("id"),
         "nombreDeUsuario": usuario_data.get("nombreDeUsuario"),
         "email": usuario_data.get("email"),
+        "tipoUsuario": usuario_data.get("tipoUsuario"),
         "exp": expire,  # Expiración
         "iat": datetime.now(timezone.utc),  # Issued at (emitido en)
     }
@@ -95,7 +97,9 @@ def autenticar_usuario(identificador: str, contrasena: str) -> Optional[Dict]:
     
     # Retornar datos del usuario (sin la contraseña)
     return {
+        "id": usuario.id,
         "nombreDeUsuario": usuario.nombreDeUsuario,
         "email": usuario.email,
+        "tipoUsuario": usuario.tipoUsuario.value if usuario.tipoUsuario else None,
     }
 

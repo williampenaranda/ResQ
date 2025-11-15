@@ -20,6 +20,8 @@ load_dotenv()
 
 # Importar Base y todos los modelos para que SQLAlchemy los reconozca
 from src.dataLayer.models.modeloUsuario import Base, Usuario
+# Importar modelos SQLModel para que se registren
+from src.dataLayer.models.modeloUbicacion import Ubicacion
 
 # URL de conexión a la base de datos
 # Prioridad: variable de entorno > valor por defecto (SQLite para desarrollo)
@@ -99,7 +101,11 @@ def crear_tablas():
         SQLAlchemyError: Si hay un error al crear las tablas
     """
     try:
+        # Crear tablas de modelos SQLAlchemy (Base)
         Base.metadata.create_all(bind=engine)
+        # Crear tablas de modelos SQLModel
+        from sqlmodel import SQLModel
+        SQLModel.metadata.create_all(bind=engine)
     except SQLAlchemyError as e:
         raise
 

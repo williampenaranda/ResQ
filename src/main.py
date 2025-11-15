@@ -7,6 +7,7 @@ from src.api.solicitantes import solicitantes_router
 from src.api.operadorEmergencia import operadores_emergencia_router
 from src.api.websocket import websocket_router
 from src.api.emergencias import emergencias_router
+from src.api.ubicaciones import ubicaciones_router
 from src.businessLayer.businessComponents.llamadas.configLiveKit import ensure_livekit_healthcheck
 from src.api.atenderEmergencias import atender_emergencias_router
 @asynccontextmanager
@@ -43,6 +44,7 @@ app.include_router(solicitantes_router)
 app.include_router(operadores_emergencia_router)
 app.include_router(websocket_router)
 app.include_router(emergencias_router)
+app.include_router(ubicaciones_router)
 app.include_router(atender_emergencias_router)
 @app.get("/")
 def read_root():

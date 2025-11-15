@@ -5,6 +5,7 @@ from src.api.usuarios import usuarios_router
 from src.api.auth import auth_router
 from src.api.solicitantes import solicitantes_router
 from src.api.operadorEmergencia import operadores_emergencia_router
+from src.api.operadorAmbulancia import operadores_ambulancia_router
 from src.api.websocket import websocket_router
 from src.api.emergencias import emergencias_router
 from src.api.ubicaciones import ubicaciones_router
@@ -43,6 +44,7 @@ app.include_router(usuarios_router)
 app.include_router(auth_router)
 app.include_router(solicitantes_router)
 app.include_router(operadores_emergencia_router)
+app.include_router(operadores_ambulancia_router)
 app.include_router(websocket_router)
 app.include_router(emergencias_router)
 app.include_router(ubicaciones_router)

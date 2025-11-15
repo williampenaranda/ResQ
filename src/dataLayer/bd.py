@@ -23,6 +23,7 @@ load_dotenv()
 from src.dataLayer.models.modeloUsuario import Base, Usuario
 from src.dataLayer.models.modeloSolicitante import Solicitante
 from src.dataLayer.models.modeloOperadorEmergencia import OperadorEmergencia
+from src.dataLayer.models.modeloOperadorAmbulancia import OperadorAmbulancia
 from src.dataLayer.models.modeloUbicacion import Ubicacion
 from src.dataLayer.models.modeloSolicitud import Solicitud
 

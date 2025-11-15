@@ -1,5 +1,12 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
+import enum
+from typing import Optional
 
+class TipoUsuario(enum.Enum):
+    OPERADOR_AMBULANCIA = "OPERADOR_AMBULANCIA"
+    OPERADOR_EMERGENCIA = "OPERADOR_EMERGENCIA"
+    SOLICITANTE = "SOLICITANTE"
+    ADMINISTRADOR = "ADMINISTRADOR"
 
 class Usuario(BaseModel):
     """Modelo Pydantic (v2) que representa un usuario.
@@ -9,10 +16,13 @@ class Usuario(BaseModel):
     - email: email (validado con EmailStr)
     - contrasenaHasheada: contraseña ya hasheada (cadena no vacía)
     """
-
+    id: Optional[int] = None
+    id_persona: Optional[int] = None
     nombreDeUsuario: str = Field(..., min_length=1)
     email: EmailStr
     contrasenaHasheada: str = Field(..., min_length=1)
+    tipoUsuario: TipoUsuario
+    
 
     # Normalizar/validar campos simples
     @field_validator("nombreDeUsuario", mode="before")

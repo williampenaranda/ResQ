@@ -39,8 +39,8 @@ class ServicioEmergencia:
         if not emergencia.solicitud or not emergencia.solicitud.id:
             raise ValueError("La emergencia debe tener una solicitud con ID válido")
         
-        if not emergencia.paciente or not emergencia.paciente.id:
-            raise ValueError("La emergencia debe tener un paciente con ID válido")
+        if not emergencia.solicitante or not emergencia.solicitante.id:
+            raise ValueError("La emergencia debe tener un solicitante con ID válido")
         
         if not emergencia.id_operador or emergencia.id_operador <= 0:
             raise ValueError("La emergencia debe tener un operador con ID válido")

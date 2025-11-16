@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional
 from src.businessLayer.businessEntities.solicitud import Solicitud
+from src.businessLayer.businessEntities.solicitante import Solicitante
 from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmergencia
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
 from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
-from src.businessLayer.businessEntities.persona import Persona
 
 class Emergencia(BaseModel):
     id: Optional[int] = None
@@ -14,7 +14,7 @@ class Emergencia(BaseModel):
     nivelPrioridad: NivelPrioridad
     descripcion: str
     id_operador: int
-    paciente: Persona
+    solicitante: Solicitante
 
     # Analizadores (Getters)
     def get_id(self) -> Optional[int]:
@@ -45,9 +45,9 @@ class Emergencia(BaseModel):
         """Retorna el ID del operador asignado."""
         return self.id_operador
     
-    def get_paciente(self) -> Persona:
-        """Retorna el paciente de la emergencia."""
-        return self.paciente
+    def get_solicitante(self) -> Solicitante:
+        """Retorna el solicitante de la emergencia."""
+        return self.solicitante
 
     # Modificadores (Setters)
     
@@ -102,13 +102,13 @@ class Emergencia(BaseModel):
             raise ValueError("El ID del operador debe ser un entero positivo")
         self.id_operador = id_operador
     
-    def set_paciente(self, paciente: Persona) -> None:
-        """Establece el paciente de la emergencia."""
-        if paciente is None:
-            raise ValueError("El paciente no puede ser None")
-        if not isinstance(paciente, Persona):
-            raise TypeError("El paciente debe ser una instancia de Persona")
-        self.paciente = paciente
+    def set_solicitante(self, solicitante: Solicitante) -> None:
+        """Establece el solicitante de la emergencia."""
+        if solicitante is None:
+            raise ValueError("El solicitante no puede ser None")
+        if not isinstance(solicitante, Solicitante):
+            raise TypeError("El solicitante debe ser una instancia de Solicitante")
+        self.solicitante = solicitante
 
     # Método toString
     def __str__(self) -> str:
@@ -121,4 +121,4 @@ class Emergencia(BaseModel):
                 f"descripcion='{descripcion_str}', "
                 f"id_operador={self.id_operador}, "
                 f"solicitud_id={self.solicitud.get_id()}, "
-                f"paciente_id={self.paciente.get_id()})")
+                f"solicitante_id={self.solicitante.get_id()})")

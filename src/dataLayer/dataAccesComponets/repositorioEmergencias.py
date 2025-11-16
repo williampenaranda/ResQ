@@ -25,19 +25,19 @@ from src.dataLayer.dataAccesComponets.repositorioOperadorEmergencia import obten
 def _mapear_be_a_db(emergencia: EmergenciaBE) -> EmergenciaDB:
     """
     Mapea una Emergencia de la capa de negocio a la capa de datos.
-    Requiere que la solicitud, operador y paciente ya existan en la BD (tengan ID).
+    Requiere que la solicitud, operador y solicitante ya existan en la BD (tengan ID).
     """
     if not emergencia.solicitud.id:
         raise ValueError("La solicitud debe tener un ID para crear la emergencia")
-    if not emergencia.paciente.id:
-        raise ValueError("El paciente debe tener un ID para crear la emergencia")
+    if not emergencia.solicitante.id:
+        raise ValueError("El solicitante debe tener un ID para crear la emergencia")
     if not emergencia.id_operador or emergencia.id_operador <= 0:
         raise ValueError("El operador debe tener un ID válido")
     
     return EmergenciaDB(
         solicitud_id=emergencia.solicitud.id,
         id_operador=emergencia.id_operador,
-        paciente_id=emergencia.paciente.id,
+        solicitante_id=emergencia.solicitante.id,
         estado=emergencia.estado,
         tipoAmbulancia=emergencia.tipoAmbulancia,
         nivelPrioridad=emergencia.nivelPrioridad,
@@ -48,7 +48,7 @@ def _mapear_be_a_db(emergencia: EmergenciaBE) -> EmergenciaDB:
 def _mapear_db_a_be(db_obj: EmergenciaDB) -> EmergenciaBE:
     """
     Mapea una Emergencia de la capa de datos a la capa de negocio.
-    Carga los objetos completos de Solicitud, OperadorEmergencia y Solicitante (paciente) desde sus repositorios.
+    Carga los objetos completos de Solicitud, OperadorEmergencia y Solicitante desde sus repositorios.
     """
     # Cargar la solicitud completa
     solicitud = obtener_solicitud_por_id(db_obj.solicitud_id)
@@ -60,10 +60,10 @@ def _mapear_db_a_be(db_obj: EmergenciaDB) -> EmergenciaBE:
     if not operador:
         raise RuntimeError(f"Operador con id {db_obj.id_operador} no encontrado")
     
-    # Cargar el paciente (solicitante) completo
-    paciente = obtener_solicitante_por_id(db_obj.paciente_id)
-    if not paciente:
-        raise RuntimeError(f"Paciente (solicitante) con id {db_obj.paciente_id} no encontrado")
+    # Cargar el solicitante completo
+    solicitante = obtener_solicitante_por_id(db_obj.solicitante_id)
+    if not solicitante:
+        raise RuntimeError(f"Solicitante con id {db_obj.solicitante_id} no encontrado")
     
     return EmergenciaBE(
         id=db_obj.id,
@@ -73,7 +73,7 @@ def _mapear_db_a_be(db_obj: EmergenciaDB) -> EmergenciaBE:
         nivelPrioridad=NivelPrioridad(db_obj.nivelPrioridad) if isinstance(db_obj.nivelPrioridad, str) else db_obj.nivelPrioridad,
         descripcion=db_obj.descripcion,
         id_operador=db_obj.id_operador,
-        paciente=paciente
+        solicitante=solicitante
     )
 
 
@@ -183,7 +183,7 @@ def obtener_emergencias_por_solicitud(id_solicitud: int) -> Optional[EmergenciaB
 def actualizar_emergencia(id_emergencia: int, cambios: dict) -> Optional[EmergenciaBE]:
     """
     Actualiza campos de la emergencia. `cambios` puede incluir:
-    estado, tipoAmbulancia, nivelPrioridad, descripcion, id_operador, paciente_id, solicitud_id.
+    estado, tipoAmbulancia, nivelPrioridad, descripcion, id_operador, solicitud_id, solicitante_id.
     """
     if not cambios:
         raise ValueError("No hay cambios para aplicar")
@@ -205,10 +205,10 @@ def actualizar_emergencia(id_emergencia: int, cambios: dict) -> Optional[Emergen
             if not operador:
                 raise ValueError(f"Operador con id {cambios['id_operador']} no existe")
         
-        if "paciente_id" in cambios:
-            paciente = obtener_solicitante_por_id(cambios["paciente_id"])
-            if not paciente:
-                raise ValueError(f"Paciente con id {cambios['paciente_id']} no existe")
+        if "solicitante_id" in cambios:
+            solicitante = obtener_solicitante_por_id(cambios["solicitante_id"])
+            if not solicitante:
+                raise ValueError(f"Solicitante con id {cambios['solicitante_id']} no existe")
 
         # Convertir enums si es necesario
         if "estado" in cambios and isinstance(cambios["estado"], str):

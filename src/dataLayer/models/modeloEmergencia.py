@@ -2,7 +2,7 @@
 Modelo de base de datos para la tabla de emergencias.
 
 Define la estructura de la tabla 'emergencias' utilizando SQLAlchemy ORM.
-Relaciona con Solicitud, OperadorEmergencia y Solicitante (como paciente).
+Relaciona con Solicitud, OperadorEmergencia y Solicitante.
 """
 
 from sqlalchemy import (
@@ -32,7 +32,7 @@ class Emergencia(Base):
     - nivelPrioridad: Nivel de prioridad (Enum)
     - descripcion: Descripción de la emergencia
     - id_operador: ID del operador asignado (FK a operadores_emergencia.id)
-    - paciente_id: ID del paciente (FK a solicitantes.id)
+    - solicitante_id: ID del solicitante (FK a solicitantes.id)
     - fechaCreacion / fechaActualizacion: Timestamps en UTC
     """
 
@@ -53,7 +53,7 @@ class Emergencia(Base):
         nullable=False,
         index=True
     )
-    paciente_id = Column(
+    solicitante_id = Column(
         Integer,
         ForeignKey("solicitantes.id", ondelete="CASCADE"),
         nullable=False,
@@ -87,8 +87,8 @@ class Emergencia(Base):
     )
 
     def __repr__(self):
-        return f"<Emergencia(id={self.id}, estado={self.estado}, solicitud_id={self.solicitud_id}, paciente_id={self.paciente_id})>"
+        return f"<Emergencia(id={self.id}, estado={self.estado}, solicitud_id={self.solicitud_id}, solicitante_id={self.solicitante_id})>"
 
     def __str__(self):
-        return f"Emergencia(id={self.id}, estado={self.estado.value}, solicitud_id={self.solicitud_id}, paciente_id={self.paciente_id})"
+        return f"Emergencia(id={self.id}, estado={self.estado.value}, solicitud_id={self.solicitud_id}, solicitante_id={self.solicitante_id})"
 

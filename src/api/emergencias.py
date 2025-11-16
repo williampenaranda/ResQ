@@ -164,7 +164,7 @@ class EmergenciaCreate(BaseModel):
     nivelPrioridad: NivelPrioridad = Field(..., description="Nivel de prioridad")
     descripcion: str = Field(..., min_length=1, description="Descripción de la emergencia")
     id_operador: int = Field(..., gt=0, description="ID del operador asignado")
-    paciente_id: int = Field(..., gt=0, description="ID del paciente (solicitante)")
+    solicitante_id: int = Field(..., gt=0, description="ID del solicitante")
 
 
 class EmergenciaUpdate(BaseModel):
@@ -174,8 +174,8 @@ class EmergenciaUpdate(BaseModel):
     nivelPrioridad: Optional[NivelPrioridad] = Field(None, description="Nivel de prioridad")
     descripcion: Optional[str] = Field(None, min_length=1, description="Descripción de la emergencia")
     id_operador: Optional[int] = Field(None, gt=0, description="ID del operador asignado")
-    paciente_id: Optional[int] = Field(None, gt=0, description="ID del paciente (solicitante)")
     solicitud_id: Optional[int] = Field(None, gt=0, description="ID de la solicitud")
+    solicitante_id: Optional[int] = Field(None, gt=0, description="ID del solicitante")
 
 
 # ======== Endpoints CRUD ========
@@ -264,7 +264,7 @@ def obtener_emergencia_por_solicitud(
 def crear_emergencia(emergencia_data: EmergenciaCreate = Body(...)):
     """
     Crea una nueva emergencia.
-    Requiere que la solicitud, operador y paciente existan en la base de datos.
+    Requiere que la solicitud, operador y solicitante existan en la base de datos.
     """
     try:
         from src.dataLayer.dataAccesComponets.repositorioSolicitudes import obtener_solicitud_por_id
@@ -278,12 +278,12 @@ def crear_emergencia(emergencia_data: EmergenciaCreate = Body(...)):
                 detail=f"Solicitud con id {emergencia_data.solicitud_id} no encontrada"
             )
         
-        # Obtener el paciente (solicitante)
-        paciente = obtener_solicitante_por_id(emergencia_data.paciente_id)
-        if not paciente:
+        # Obtener el solicitante
+        solicitante = obtener_solicitante_por_id(emergencia_data.solicitante_id)
+        if not solicitante:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Paciente (solicitante) con id {emergencia_data.paciente_id} no encontrado"
+                detail=f"Solicitante con id {emergencia_data.solicitante_id} no encontrado"
             )
         
         # Crear la entidad Emergencia
@@ -295,7 +295,7 @@ def crear_emergencia(emergencia_data: EmergenciaCreate = Body(...)):
             nivelPrioridad=emergencia_data.nivelPrioridad,
             descripcion=emergencia_data.descripcion,
             id_operador=emergencia_data.id_operador,
-            paciente=paciente
+            solicitante=solicitante
         )
         
         creada = ServicioEmergencia.crear(emergencia)

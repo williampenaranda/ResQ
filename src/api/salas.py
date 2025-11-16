@@ -25,6 +25,7 @@ class SalaInfo(BaseModel):
     """Modelo de respuesta con información simplificada de una sala."""
     name: str = Field(..., description="Nombre de la sala")
     url: str = Field(..., description="URL del servidor de LiveKit")
+    personas_conectadas: str = Field(..., description="Personas conectadas en formato X/2")
 
 
 class SalasActivasResponse(BaseModel):
@@ -37,7 +38,7 @@ class SalasActivasResponse(BaseModel):
     "/activas",
     response_model=SalasActivasResponse,
     summary="Listar salas activas",
-    description="Obtiene la lista de salas de emergencia activas que tienen espacio disponible (menos de 2 participantes). Retorna solo el nombre y la URL de cada sala."
+    description="Obtiene la lista de salas de emergencia activas que tienen espacio disponible (menos de 2 participantes). Retorna el nombre, URL y personas conectadas en formato X/2."
 )
 async def listar_salas_activas_endpoint():
     """
@@ -79,14 +80,23 @@ async def listar_salas_activas_endpoint():
                 elif hasattr(sala, 'participants') and sala.participants:
                     num_participants = len(sala.participants)
             
+            # Obtener max_participants de la sala (por defecto 2 para salas de emergencia)
+            max_participants = getattr(sala, 'max_participants', None)
+            if max_participants is None or max_participants <= 0:
+                max_participants = 2  # Valor por defecto para salas de emergencia
+            
             # Filtrar salas llenas (2 o más participantes)
-            if num_participants >= 2:
+            if num_participants >= max_participants:
                 continue  # No incluir salas llenas
+            
+            # Formatear personas conectadas como "X/2"
+            personas_conectadas_str = f"{num_participants}/{max_participants}"
             
             # Crear información simplificada de la sala
             sala_info = SalaInfo(
                 name=sala.name,
-                url=LIVEKIT_URL or ""
+                url=LIVEKIT_URL or "",
+                personas_conectadas=personas_conectadas_str
             )
             salas_info.append(sala_info)
         

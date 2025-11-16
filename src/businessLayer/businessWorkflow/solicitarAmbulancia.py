@@ -58,5 +58,5 @@ class SolicitarAmbulancia:
             "token": token,
             "identity": identidad,
             "server_url": LIVEKIT_URL,
-            "solicitud": solicitud_dict,
+            "solicitud": solicitud_creada.model_dump(mode="json"),
         }

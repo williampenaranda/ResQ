@@ -26,6 +26,7 @@ from src.dataLayer.models.modeloOperadorEmergencia import OperadorEmergencia
 from src.dataLayer.models.modeloOperadorAmbulancia import OperadorAmbulancia
 from src.dataLayer.models.modeloUbicacion import Ubicacion
 from src.dataLayer.models.modeloSolicitud import Solicitud
+from src.dataLayer.models.modeloEmergencia import Emergencia
 
 # URL de conexión a la base de datos
 # Prioridad: variable de entorno > valor por defecto (SQLite para desarrollo)
@@ -122,6 +123,17 @@ def inicializar_base_datos():
     """
     verificar_conexion()
     crear_tablas()
+    
+    # Ejecutar migraciones necesarias
+    try:
+        from src.dataLayer.migraciones.agregar_campos_usuario import agregar_campos_usuario
+        agregar_campos_usuario()
+    except Exception as e:
+        print(f"Advertencia: Error al ejecutar migraciones: {e}")
+        # No fallar si es SQLite (no soporta DO $$)
+        if "sqlite" not in DATABASE_URL.lower():
+            raise
+    
     print("Base de datos lista")
 
 

@@ -16,7 +16,7 @@ emergencias_router = APIRouter(
     tags=["emergencias"]
 )
 
-# ======== Modelos de Request/Response para la API (no exponen entidades internas) ========
+# ======== Modelos de Request/Response para la API  ========
 
 class SolicitanteRequest(BaseModel):
     id: int = Field(..., description="ID del solicitante en el sistema")

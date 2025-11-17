@@ -61,12 +61,8 @@ async def websocket_endpoint(websocket: WebSocket):
             # Recibir mensaje del cliente
             data = await websocket.receive_text()
             
-            # Procesar el mensaje (puedes personalizar esto según tus necesidades)
             try:
                 message = json.loads(data)
-                # Aquí puedes procesar el mensaje según tu lógica de negocio
-                
-                # Enviar respuesta al cliente
                 await manager.send_personal_message(
                     json.dumps({"status": "received", "message": message}),
                     websocket
@@ -106,10 +102,8 @@ async def websocket_emergencia(websocket: WebSocket):
             # Recibir mensajes del cliente (pueden ser pings o comandos)
             try:
                 data = await websocket.receive_text()
-                # Opcional: procesar mensajes del cliente si es necesario
-                # Por ahora solo mantenemos la conexión activa
+                
             except Exception:
-                # Si hay error al recibir, salir del loop
                 break
                 
     except WebSocketDisconnect:

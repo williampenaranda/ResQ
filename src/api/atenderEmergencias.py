@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional, List
 from src.businessLayer.businessWorkflow.solicitarAmbulancia import SolicitarAmbulancia
 from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
+from dotenv import load_dotenv
 
 class WebSocketInfoResponse(BaseModel):
     websocket_url: str = Field(..., description="URL del endpoint WebSocket para conectarse")
@@ -46,6 +47,7 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
     
     # Construir la URL del WebSocket (asumiendo que se ejecuta en localhost:8000 por defecto)
     # En producción, esto debería venir de una variable de entorno
+    load_dotenv()
     import os
     base_url_env = os.getenv("API_BASE_URL")
     if base_url_env:

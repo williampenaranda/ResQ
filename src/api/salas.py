@@ -3,11 +3,12 @@ Endpoints para gestionar salas de LiveKit.
 Proporciona endpoints para listar y obtener información de salas activas.
 """
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Body
 from typing import List
 from pydantic import BaseModel, Field
 from src.businessLayer.businessComponents.llamadas.listarSalas import listar_salas_activas
 from src.businessLayer.businessComponents.llamadas.configLiveKit import get_room_service, LIVEKIT_URL
+from src.businessLayer.businessWorkflow.unirseSalaEmergencia import UnirseSalaEmergencia
 from livekit import api
 from src.api.security import require_auth
 import logging
@@ -24,7 +25,6 @@ salas_router = APIRouter(
 class SalaInfo(BaseModel):
     """Modelo de respuesta con información simplificada de una sala."""
     name: str = Field(..., description="Nombre de la sala")
-    url: str = Field(..., description="URL del servidor de LiveKit")
     personas_conectadas: str = Field(..., description="Personas conectadas en formato X/2")
 
 
@@ -34,11 +34,25 @@ class SalasActivasResponse(BaseModel):
     salas: List[SalaInfo] = Field(..., description="Lista de salas activas")
 
 
+class UnirseSalaRequest(BaseModel):
+    """Modelo de request para unirse a una sala."""
+    id_operador: int = Field(..., gt=0, description="ID del operador de emergencia")
+    room: str = Field(..., min_length=1, description="Nombre de la sala a la que se unirá")
+
+
+class UnirseSalaResponse(BaseModel):
+    """Modelo de respuesta con los datos para entrar a la sala."""
+    room: str = Field(..., description="Nombre de la sala")
+    token: str = Field(..., description="Token JWT de LiveKit para unirse a la sala")
+    identity: str = Field(..., description="Identidad generada para el participante")
+    server_url: str = Field(..., description="URL del servidor de LiveKit")
+
+
 @salas_router.get(
     "/activas",
     response_model=SalasActivasResponse,
     summary="Listar salas activas",
-    description="Obtiene la lista de salas de emergencia activas que tienen espacio disponible (menos de 2 participantes). Retorna el nombre, URL y personas conectadas en formato X/2."
+    description="Obtiene la lista de salas de emergencia activas que tienen espacio disponible (menos de 2 participantes). Retorna el nombre y personas conectadas en formato X/2."
 )
 async def listar_salas_activas_endpoint():
     """
@@ -49,7 +63,7 @@ async def listar_salas_activas_endpoint():
     - No están llenas (menos de 2 participantes)
     
     Returns:
-        SalasActivasResponse: Lista de salas activas con nombre y URL.
+        SalasActivasResponse: Lista de salas activas con nombre y personas conectadas.
     """
     try:
         salas = await listar_salas_activas()
@@ -95,7 +109,6 @@ async def listar_salas_activas_endpoint():
             # Crear información simplificada de la sala
             sala_info = SalaInfo(
                 name=sala.name,
-                url=LIVEKIT_URL or "",
                 personas_conectadas=personas_conectadas_str
             )
             salas_info.append(sala_info)
@@ -114,5 +127,59 @@ async def listar_salas_activas_endpoint():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al listar salas: {str(e)}"
+        )
+
+
+@salas_router.put(
+    "",
+    response_model=UnirseSalaResponse,
+    summary="Unirse a una sala de emergencia",
+    description=(
+        "Genera las credenciales necesarias (token, identity) para que un operador de emergencia "
+        "se una a una sala de LiveKit existente. Retorna los datos necesarios para conectarse a la sala."
+    ),
+)
+async def unirse_a_sala_endpoint(
+    request: UnirseSalaRequest = Body(
+        ...,
+        examples={
+            "ejemploBasico": {
+                "summary": "Unirse a sala",
+                "value": {
+                    "id_operador": 1,
+                    "room": "emergencia-uuid-1234"
+                }
+            }
+        }
+    )
+) -> UnirseSalaResponse:
+    """
+    Endpoint para que un operador de emergencia se una a una sala existente.
+    
+    Recibe el ID del operador y el nombre de la sala, y retorna:
+    - room: Nombre de la sala
+    - token: Token JWT para acceder a la sala
+    - identity: Identidad del participante
+    - server_url: URL del servidor de LiveKit
+    
+    Returns:
+        UnirseSalaResponse: Datos necesarios para conectarse a la sala.
+    """
+    try:
+        result = await UnirseSalaEmergencia.unirse_a_sala(
+            id_operador=request.id_operador,
+            nombre_sala=request.room
+        )
+        return UnirseSalaResponse(**result)
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(ve)
+        )
+    except Exception as e:
+        logger.error(f"Error inesperado al unirse a la sala: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al unirse a la sala: {str(e)}"
         )
 

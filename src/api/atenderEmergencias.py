@@ -12,6 +12,7 @@ class WebSocketInfoResponse(BaseModel):
     descripcion: str = Field(..., description="Descripción del endpoint WebSocket")
     mensaje_bienvenida: dict = Field(..., description="Estructura del mensaje de bienvenida que se recibe al conectar")
     mensaje_emergencia: dict = Field(..., description="Estructura del mensaje que se recibe cuando hay una nueva emergencia")
+    mensaje_sala_atendida: dict = Field(..., description="Estructura del mensaje que se recibe cuando una sala está atendida")
 
 
 
@@ -40,7 +41,9 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
     - Ejemplos de mensajes
     - Ejemplo de código para conectarse
     """
-    from src.api.websocket import manager_emergencias
+    from src.comunication.notificadorEmergencias import get_manager_emergencias
+    
+    manager_emergencias = get_manager_emergencias()
     
     # Obtener el número de conexiones activas
     conexiones_activas = manager_emergencias.get_active_connections_count()
@@ -73,9 +76,11 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
         websocket_url=websocket_url,
         conexiones_activas=conexiones_activas,
         descripcion=(
-            "Endpoint WebSocket para recibir notificaciones en tiempo real de nuevas emergencias. "
+            "Endpoint WebSocket para recibir notificaciones en tiempo real de emergencias. "
             "Al conectarse, recibirás un mensaje de bienvenida y luego comenzarás a recibir "
-            "notificaciones automáticas cuando se registre una nueva solicitud de ambulancia."
+            "notificaciones automáticas de: "
+            "1) Nuevas solicitudes de ambulancia (tipo: 'nueva_solicitud') con el nombre de la sala, "
+            "2) Salas atendidas cuando se llenan (tipo: 'sala_atendida') con el nombre de la sala + 'atendida'."
         ),
         mensaje_bienvenida={
             "type": "connection",
@@ -98,8 +103,15 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
                     "fechaHora": "2024-01-15T10:30:00"
                 },
                 "fechaHora": "2024-01-15T10:30:00",
+                "room": "emergencia-uuid-1234"
+            },
+            "timestamp": "2024-01-15T10:30:00.123456"
+        },
+        mensaje_sala_atendida={
+            "type": "sala_atendida",
+            "data": {
                 "room": "emergencia-uuid-1234",
-                "server_url": "wss://livekit.example.com"
+                "estado": "atendida"
             },
             "timestamp": "2024-01-15T10:30:00.123456"
         }

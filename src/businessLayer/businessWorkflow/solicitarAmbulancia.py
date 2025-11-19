@@ -8,6 +8,7 @@ from src.businessLayer.businessComponents.llamadas.configLiveKit import (
     LIVEKIT_URL,
     validate_livekit_config,
 )
+from src.comunication.notificadorEmergencias import notificar_nueva_solicitud
 import uuid
 
 class SolicitarAmbulancia:
@@ -53,10 +54,19 @@ class SolicitarAmbulancia:
             nombre_sala=nombreSala
         )
 
+        # Preparar datos de la solicitud para notificar
+        datos_solicitud = solicitud_creada.model_dump(mode="json")
+        
+        # Notificar nueva solicitud con el nombre de la sala
+        await notificar_nueva_solicitud(
+            nombre_sala=nombreSala,
+            datos_solicitud=datos_solicitud
+        )
+
         return {
             "room": nombreSala,
             "token": token,
             "identity": identidad,
             "server_url": LIVEKIT_URL,
-            "solicitud": solicitud_creada.model_dump(mode="json"),
+            "solicitud": datos_solicitud,
         }

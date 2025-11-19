@@ -47,37 +47,6 @@ websocket_router = APIRouter(
     tags=["websocket"]
 )
 
-
-@websocket_router.websocket("/")
-async def websocket_endpoint(websocket: WebSocket):
-    """
-    Endpoint WebSocket básico.
-    
-    Acepta conexiones WebSocket y permite enviar/recibir mensajes.
-    """
-    await manager.connect(websocket)
-    try:
-        while True:
-            # Recibir mensaje del cliente
-            data = await websocket.receive_text()
-            
-            try:
-                message = json.loads(data)
-                await manager.send_personal_message(
-                    json.dumps({"status": "received", "message": message}),
-                    websocket
-                )
-            except json.JSONDecodeError:
-                # Si no es JSON, enviar echo
-                await manager.send_personal_message(
-                    json.dumps({"status": "echo", "message": data}),
-                    websocket
-                )
-                
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-
-
 @websocket_router.websocket("/emergencias")
 async def websocket_emergencia(websocket: WebSocket):
     """

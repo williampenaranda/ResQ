@@ -8,8 +8,9 @@ from src.businessLayer.businessEntities.emergencia import Emergencia
 from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmergencia
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
 from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
-from src.businessLayer.businessComponents.actores.servicioEmergencia import ServicioEmergencia
-from src.api.security import require_auth
+from src.businessLayer.businessComponents.entidades.servicioEmergencia import ServicioEmergencia
+from src.api.security import require_auth, require_role
+from src.security.entities.Usuario import TipoUsuario
 
 emergencias_router = APIRouter(
     prefix="/emergencias",
@@ -121,10 +122,12 @@ def obtener_emergencia_por_solicitud(
     response_model=Emergencia,
     status_code=status.HTTP_201_CREATED,
     summary="Crear emergencia",
-    description="Crea una nueva emergencia y retorna el recurso creado con su ID asignado.",
-    dependencies=[Depends(require_auth)],
+    description="Crea una nueva emergencia y retorna el recurso creado con su ID asignado. Solo OPERADOR_EMERGENCIA y ADMINISTRADOR pueden crear emergencias.",
 )
-def crear_emergencia(emergencia_data: EmergenciaCreate = Body(...)):
+def crear_emergencia(
+    emergencia_data: EmergenciaCreate = Body(...),
+    payload: dict = Depends(require_role([TipoUsuario.OPERADOR_EMERGENCIA, TipoUsuario.ADMINISTRADOR]))
+):
     """
     Crea una nueva emergencia.
     Requiere que la solicitud, operador y solicitante existan en la base de datos.

@@ -3,7 +3,7 @@ from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, Field
 from datetime import date
 from src.businessLayer.businessEntities.solicitante import Solicitante
-from src.businessLayer.businessComponents.actores.servicioSolicitante import (
+from src.businessLayer.businessComponents.entidades.servicioSolicitante import (
     ServicioSolicitante,
 )
 from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento

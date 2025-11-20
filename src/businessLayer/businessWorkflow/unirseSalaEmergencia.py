@@ -1,4 +1,4 @@
-from src.businessLayer.businessComponents.actores.servicioOperadorEmergencia import ServicioOperadorEmergencia
+from src.businessLayer.businessComponents.entidades.servicioOperadorEmergencia import ServicioOperadorEmergencia
 from src.businessLayer.businessComponents.llamadas.unirseSala import generar_token_unirse_sala
 from src.businessLayer.businessComponents.llamadas.obtenerParticipantesSala import (
     obtener_numero_participantes,

@@ -3,7 +3,7 @@ from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, Field
 from datetime import datetime
 from src.businessLayer.businessEntities.ubicacion import Ubicacion
-from src.businessLayer.businessComponents.actores.servicioUbicacion import (
+from src.businessLayer.businessComponents.entidades.servicioUbicacion import (
     ServicioUbicacion,
 )
 from src.api.security import require_auth

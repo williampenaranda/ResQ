@@ -5,7 +5,7 @@ from datetime import date
 
 from src.businessLayer.businessEntities.operadorAmbulancia import OperadorAmbulancia
 from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
-from src.businessLayer.businessComponents.actores.servicioOperadorAmbulancia import (
+from src.businessLayer.businessComponents.entidades.servicioOperadorAmbulancia import (
     ServicioOperadorAmbulancia,
 )
 from src.api.security import require_auth

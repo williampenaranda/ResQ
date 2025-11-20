@@ -6,7 +6,7 @@ class Ubicacion(BaseModel):
     id: Optional[int] = Field(default=None, description="ID de la ubicación (se genera automáticamente)")
     latitud: float
     longitud: float
-    fechaHora: datetime
+    fechaHora: Optional[datetime] = None
 
     # Analizadores (Getters)
     def get_latitud(self) -> float:

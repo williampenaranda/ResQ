@@ -56,7 +56,6 @@ class OperadorEmergencia(Base):
 
     # Datos laborales
     disponibilidad = Column(Boolean, nullable=False, default=False)
-    turno = Column(String(100), nullable=False)
 
     # Timestamps
     fechaCreacion = Column(DateTime(timezone=True), default=obtener_fecha_utc, nullable=False)

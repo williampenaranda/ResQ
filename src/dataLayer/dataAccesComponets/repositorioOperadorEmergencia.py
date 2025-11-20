@@ -27,7 +27,6 @@ def _mapear_be_a_db(operador: OperadorBE) -> OperadorDB:
         tipoDocumento=operador.tipoDocumento,
         numeroDocumento=operador.numeroDocumento,
         disponibilidad=operador.disponibilidad,
-        turno=operador.turno,
     )
 
 
@@ -42,7 +41,6 @@ def _mapear_db_a_be(db_obj: OperadorDB) -> OperadorBE:
         tipoDocumento=TipoDocumento(db_obj.tipoDocumento) if not isinstance(db_obj.tipoDocumento, TipoDocumento) else db_obj.tipoDocumento,
         numeroDocumento=db_obj.numeroDocumento,
         disponibilidad=db_obj.disponibilidad,
-        turno=db_obj.turno,
     )
 
 

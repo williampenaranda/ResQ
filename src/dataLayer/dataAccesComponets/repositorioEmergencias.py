@@ -164,6 +164,22 @@ def obtener_emergencias_por_operador(id_operador: int, limit: int = 50, offset: 
         sesion.close()
 
 
+def obtener_emergencias_por_solicitante(id_solicitante: int, limit: int = 50, offset: int = 0) -> List[EmergenciaBE]:
+    """
+    Obtiene todas las emergencias realizadas por un solicitante específico.
+    """
+    sesion: Session = SessionLocal()
+    try:
+        query = sesion.query(EmergenciaDB).filter(
+            EmergenciaDB.solicitante_id == id_solicitante
+        ).order_by(EmergenciaDB.fechaCreacion.desc()).offset(offset).limit(limit)
+        return [_mapear_db_a_be(row) for row in query.all()]
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Error al obtener emergencias por solicitante: {e}")
+    finally:
+        sesion.close()
+
+
 def obtener_emergencias_por_solicitud(id_solicitud: int) -> Optional[EmergenciaBE]:
     """
     Obtiene la emergencia asociada a una solicitud específica.

@@ -92,6 +92,29 @@ def listar_emergencias_por_operador(
 
 
 @emergencias_router.get(
+    "/por-solicitante/{id_solicitante}",
+    response_model=List[Emergencia],
+    summary="Listar emergencias por solicitante",
+    description="Lista emergencias realizadas por un solicitante específico.",
+    dependencies=[Depends(require_auth)],
+)
+def listar_emergencias_por_solicitante(
+    id_solicitante: int = Path(..., gt=0, description="ID del solicitante"),
+    limit: int = Query(50, ge=1, le=100, description="Número máximo de resultados"),
+    offset: int = Query(0, ge=0, description="Número de resultados a omitir"),
+):
+    """
+    Lista emergencias realizadas por un solicitante específico.
+    """
+    try:
+        return ServicioEmergencia.obtener_por_solicitante(id_solicitante, limit=limit, offset=offset)
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@emergencias_router.get(
     "/por-solicitud/{id_solicitud}",
     response_model=Emergencia,
     summary="Obtener emergencia por solicitud",

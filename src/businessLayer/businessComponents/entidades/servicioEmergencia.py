@@ -16,6 +16,7 @@ from src.dataLayer.dataAccesComponets.repositorioEmergencias import (
     listar_emergencias as repo_listar_emergencias,
     obtener_emergencias_por_estado as repo_obtener_emergencias_por_estado,
     obtener_emergencias_por_operador as repo_obtener_emergencias_por_operador,
+    obtener_emergencias_por_solicitante as repo_obtener_emergencias_por_solicitante,
     obtener_emergencias_por_solicitud as repo_obtener_emergencias_por_solicitud,
     actualizar_emergencia as repo_actualizar_emergencia,
     eliminar_emergencia as repo_eliminar_emergencia,
@@ -106,6 +107,19 @@ class ServicioEmergencia:
         if offset < 0:
             offset = 0
         return repo_obtener_emergencias_por_operador(id_operador, limit=limit, offset=offset)
+
+    @staticmethod
+    def obtener_por_solicitante(id_solicitante: int, limit: int = 50, offset: int = 0) -> List[Emergencia]:
+        """
+        Obtiene emergencias realizadas por un solicitante específico.
+        """
+        if not isinstance(id_solicitante, int) or id_solicitante <= 0:
+            raise ValueError("id_solicitante inválido")
+        if limit <= 0:
+            limit = 50
+        if offset < 0:
+            offset = 0
+        return repo_obtener_emergencias_por_solicitante(id_solicitante, limit=limit, offset=offset)
 
     @staticmethod
     def obtener_por_solicitud(id_solicitud: int) -> Optional[Emergencia]:

@@ -3,9 +3,10 @@ import enum
 from typing import Optional
 
 class TipoUsuario(enum.Enum):
+    """Tipos de usuario del sistema para control de acceso."""
+    SOLICITANTE = "SOLICITANTE"
     OPERADOR_AMBULANCIA = "OPERADOR_AMBULANCIA"
     OPERADOR_EMERGENCIA = "OPERADOR_EMERGENCIA"
-    SOLICITANTE = "SOLICITANTE"
     ADMINISTRADOR = "ADMINISTRADOR"
 
 class Usuario(BaseModel):

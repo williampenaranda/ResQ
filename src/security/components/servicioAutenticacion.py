@@ -39,7 +39,7 @@ def generar_token(usuario_data: Dict) -> str:
         "id": usuario_data.get("id"),
         "nombreDeUsuario": usuario_data.get("nombreDeUsuario"),
         "email": usuario_data.get("email"),
-        "tipoUsuario": usuario_data.get("tipoUsuario"),
+        "tipoUsuario": usuario_data.get("tipoUsuario"),  # Tipo de usuario (SOLICITANTE, OPERADOR_AMBULANCIA, OPERADOR_EMERGENCIA, ADMINISTRADOR)
         "exp": expire,  # Expiración
         "iat": datetime.now(timezone.utc),  # Issued at (emitido en)
     }

@@ -18,29 +18,19 @@ usuarios_router = APIRouter(
 )
 
 
-class UsuarioCreate(BaseModel):
-    """Modelo de request para crear un usuario (sin id, id_persona ni tipoUsuario)."""
-    nombreDeUsuario: str = Field(..., min_length=1)
-    email: EmailStr
-    contrasenaHasheada: str = Field(..., min_length=1)
 
-
-class AsignarPersonaRequest(BaseModel):
-    """Modelo de request para asignar un usuario a una persona."""
-    id_persona: int = Field(..., gt=0, description="ID de la persona a asignar")
-    tipoUsuario: TipoUsuario = Field(..., description="Tipo de usuario")
-
-
-class CredencialesRequest(BaseModel):
-    """Modelo de request para obtener id_persona por credenciales."""
-    email: EmailStr = Field(..., description="Email del usuario")
-    contrasena: str = Field(..., min_length=1, description="Contraseña del usuario")
 
 
 class IdPersonaResponse(BaseModel):
     """Modelo de respuesta con el id_persona."""
     id_persona: Optional[int] = Field(None, description="ID de la persona asociada al usuario")
 
+
+class UsuarioCreate(BaseModel):
+    """Modelo de request para crear un usuario (sin id, id_persona ni tipoUsuario)."""
+    nombreDeUsuario: str = Field(..., min_length=1)
+    email: EmailStr
+    contrasenaHasheada: str = Field(..., min_length=1)
 
 @usuarios_router.post(
     "",
@@ -162,6 +152,11 @@ async def eliminar_usuario_endpoint(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
+class CredencialesRequest(BaseModel):
+    """Modelo de request para obtener id_persona por credenciales."""
+    email: EmailStr = Field(..., description="Email del usuario")
+    contrasena: str = Field(..., min_length=1, description="Contraseña del usuario")
+
 @usuarios_router.post(
     "/obtener-id-persona",
     response_model=IdPersonaResponse,
@@ -192,6 +187,11 @@ async def obtener_id_persona_por_credenciales_endpoint(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+
+class AsignarPersonaRequest(BaseModel):
+    """Modelo de request para asignar un usuario a una persona."""
+    id_persona: int = Field(..., gt=0, description="ID de la persona a asignar")
+    tipoUsuario: TipoUsuario = Field(..., description="Tipo de usuario")
 
 @usuarios_router.put(
     "/{id_usuario}/asignar-persona",

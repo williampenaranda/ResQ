@@ -41,8 +41,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.include_router(usuarios_router)
 app.include_router(auth_router)
+app.include_router(usuarios_router)
 app.include_router(solicitantes_router)
 app.include_router(operadores_emergencia_router)
 app.include_router(operadores_ambulancia_router)

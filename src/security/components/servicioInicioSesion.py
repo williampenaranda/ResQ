@@ -3,13 +3,13 @@ Módulo de servicio para la gestión de inicio de sesión.
 Proporciona funcionalidad para autenticar usuarios y generar tokens de acceso.
 """
 
-from typing import Optional
-from datetime import timedelta
+from typing import Optional, Dict
 from fastapi import HTTPException, status
-from src.security.components.servicioUsuarios import obtenerUsuario
+from src.dataLayer.dataAccesComponets.repositorioUsuarios import obtenerUsuario
 from src.security.components.servicioHash import evaluarContrasena
-from src.security.components.servicioToken import Token, create_token_response
+from src.security.components.servicioAutenticacion import generar_token, verificar_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from pydantic import BaseModel, EmailStr, Field
+
 
 class LoginData(BaseModel):
     """
@@ -29,7 +29,15 @@ class LoginData(BaseModel):
             }
         }
 
-async def login(datos_login: LoginData) -> Token:
+
+class TokenResponse(BaseModel):
+    """Modelo para la respuesta de login."""
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+
+
+async def login(datos_login: LoginData) -> TokenResponse:
     """
     Autentica un usuario y genera un token de acceso.
     
@@ -37,7 +45,7 @@ async def login(datos_login: LoginData) -> Token:
         datos_login (LoginData): Datos de inicio de sesión (usuario/email y contraseña)
         
     Returns:
-        Token: Token de acceso si la autenticación es exitosa
+        TokenResponse: Token de acceso y metadatos si la autenticación es exitosa
         
     Raises:
         HTTPException: Si las credenciales son inválidas o hay error en la autenticación
@@ -50,10 +58,13 @@ async def login(datos_login: LoginData) -> Token:
                 detail="Debe proporcionar nombre de usuario o email"
             )
 
+        # Determinar el identificador (username o email)
+        identificador = datos_login.username or datos_login.email
+        
         # Buscar usuario
         usuario = obtenerUsuario(
-            nombreDeUsuario=datos_login.username,
-            email=datos_login.email
+            nombreDeUsuario=datos_login.username if datos_login.username else None,
+            email=datos_login.email if datos_login.email else None
         )
         
         if not usuario:
@@ -71,14 +82,22 @@ async def login(datos_login: LoginData) -> Token:
                 headers={"WWW-Authenticate": "Bearer"}
             )
             
-        # Generar token
-        token_data = {
-            "sub": usuario.nombreDeUsuario,
-            "email": usuario.email
+        # Preparar datos del usuario para el token
+        usuario_data = {
+            "id": usuario.id,
+            "nombreDeUsuario": usuario.nombreDeUsuario,
+            "email": usuario.email,
+            "tipoUsuario": usuario.tipoUsuario.value if usuario.tipoUsuario else None
         }
         
-        # Por defecto el token expira en 15 minutos (configurado en servicioToken)
-        return create_token_response(token_data)
+        # Generar token
+        token = generar_token(usuario_data)
+        
+        return TokenResponse(
+            access_token=token,
+            token_type="bearer",
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60  # En segundos
+        )
         
     except HTTPException:
         raise
@@ -88,7 +107,8 @@ async def login(datos_login: LoginData) -> Token:
             detail=f"Error en el inicio de sesión: {str(e)}"
         )
 
-async def verify_current_user(token: str) -> dict:
+
+async def verify_current_user(token: str) -> Dict:
     """
     Verifica el token del usuario actual y retorna sus datos.
     
@@ -102,10 +122,16 @@ async def verify_current_user(token: str) -> dict:
         HTTPException: Si el token es inválido o ha expirado
     """
     try:
-        from src.security.components.servicioToken import verify_token
+        payload = verificar_token(token)
         
-        payload = verify_token(token)
-        username = payload.get("sub")
+        if not payload:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token inválido o expirado",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        
+        username = payload.get("sub") or payload.get("nombreDeUsuario")
         if username is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -115,6 +141,8 @@ async def verify_current_user(token: str) -> dict:
             
         return payload
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

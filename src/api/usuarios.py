@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Body, Path, Query
+from fastapi import APIRouter, HTTPException, status, Body, Path, Query, Depends
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict, Any
 from src.security.entities.Usuario import Usuario, TipoUsuario
@@ -11,6 +11,7 @@ from src.dataLayer.dataAccesComponets.repositorioUsuarios import (
     actualizarUsuarioPersona,
     obtener_id_persona_por_credenciales
 )
+from src.api.security import require_role
 
 usuarios_router = APIRouter(
     prefix="/usuarios",
@@ -94,6 +95,7 @@ async def obtener_usuario(
     response_model=List[Usuario],
     summary="Listar usuarios",
     description="Lista usuarios con paginación."
+    #dependencies=[Depends(require_role(TipoUsuario.ADMINISTRADOR))]
 )
 async def listar_usuarios_endpoint(
     limit: int = Query(50, gt=0, le=200, description="Cantidad máxima de registros"),

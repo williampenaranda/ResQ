@@ -27,6 +27,7 @@ from src.dataLayer.models.modeloOperadorAmbulancia import OperadorAmbulancia
 from src.dataLayer.models.modeloUbicacion import Ubicacion
 from src.dataLayer.models.modeloSolicitud import Solicitud
 from src.dataLayer.models.modeloEmergencia import Emergencia
+from src.dataLayer.models.modeloAmbulancia import Ambulancia
 
 # URL de conexión a la base de datos
 # Prioridad: variable de entorno > valor por defecto (SQLite para desarrollo)

@@ -15,9 +15,12 @@ from src.api.ubicaciones import ubicaciones_router
 from src.api.solicitudes import solicitudes_router
 from src.api.salas import salas_router
 from src.businessLayer.businessComponents.llamadas.configLiveKit import ensure_livekit_healthcheck
+from src.businessLayer.businessComponents.cache.configRedis import ensure_redis_healthcheck, close_redis_client
 from src.api.atenderEmergencias import atender_emergencias_router
 from src.api.ambulancias import ambulancias_router
 from src.api.recibirNotificaciones import recibir_notificaciones_router
+from src.api.websocketAmbulancias import websocket_ambulancias_router
+from src.api.infoWebSocketAmbulancias import info_websocket_ambulancias_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -33,10 +36,19 @@ async def lifespan(app: FastAPI):
         raise
     
     await ensure_livekit_healthcheck()
+    
+    # Validar Redis
+    try:
+        ensure_redis_healthcheck()
+    except Exception as e:
+        print(f"Advertencia: Redis no está disponible: {e}")
+        print("El sistema continuará pero las ubicaciones de ambulancias no funcionarán correctamente.")
+    
     yield
     
     # Shutdown: cerrar conexiones
     engine.dispose()
+    close_redis_client()
 
 
 app = FastAPI(
@@ -76,6 +88,8 @@ app.include_router(emergencias_router)
 app.include_router(ambulancias_router)
 app.include_router(websocket_router)
 app.include_router(websocket_solicitantes_router)
+app.include_router(websocket_ambulancias_router)
+app.include_router(info_websocket_ambulancias_router)
 # app.include_router(ubicaciones_router)
 @app.get("/")
 def read_root():

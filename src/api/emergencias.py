@@ -2,16 +2,12 @@ from fastapi import APIRouter, Body, HTTPException, status, Query, Path, Depends
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
-from src.businessLayer.businessWorkflow.solicitarAmbulancia import SolicitarAmbulancia
-from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
 from src.businessLayer.businessEntities.emergencia import Emergencia
 from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmergencia
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
 from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
 from src.businessLayer.businessComponents.entidades.servicioEmergencia import ServicioEmergencia
-from src.api.security import require_auth, require_role
-from src.security.entities.Usuario import TipoUsuario
-from src.businessLayer.businessComponents.notificaciones.notificadorSolicitante import notificar_emergencia_evaluada
+from src.api.security import require_auth
 
 emergencias_router = APIRouter(
     prefix="/emergencias",
@@ -20,17 +16,6 @@ emergencias_router = APIRouter(
 )
 
 # ======== Modelos para CRUD de Emergencias ========
-
-class EmergenciaCreate(BaseModel):
-    """Modelo de request para crear una emergencia."""
-    solicitud_id: int = Field(..., gt=0, description="ID de la solicitud")
-    estado: EstadoEmergencia = Field(..., description="Estado de la emergencia")
-    tipoAmbulancia: TipoAmbulancia = Field(..., description="Tipo de ambulancia requerida")
-    nivelPrioridad: NivelPrioridad = Field(..., description="Nivel de prioridad")
-    descripcion: str = Field(..., min_length=1, description="Descripción de la emergencia")
-    id_operador: int = Field(..., gt=0, description="ID del operador asignado")
-    solicitante_id: int = Field(..., gt=0, description="ID del solicitante")
-
 
 class EmergenciaUpdate(BaseModel):
     """Modelo de request para actualizar una emergencia."""
@@ -133,73 +118,6 @@ def obtener_emergencia_por_solicitud(
         if not encontrada:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Emergencia no encontrada para esta solicitud")
         return encontrada
-    except HTTPException:
-        raise
-    except ValueError as ve:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
-
-@emergencias_router.post(
-    "",
-    response_model=Emergencia,
-    status_code=status.HTTP_201_CREATED,
-    summary="Crear emergencia",
-    description="Crea una nueva emergencia y retorna el recurso creado con su ID asignado. Solo OPERADOR_EMERGENCIA y ADMINISTRADOR pueden crear emergencias.",
-)
-async def crear_emergencia(
-    emergencia_data: EmergenciaCreate = Body(...),
-    payload: dict = Depends(require_auth)
-):
-    """
-    Crea una nueva emergencia.
-    Requiere que la solicitud, operador y solicitante existan en la base de datos.
-    """
-    try:
-        from src.dataLayer.dataAccesComponets.repositorioSolicitudes import obtener_solicitud_por_id
-        from src.dataLayer.dataAccesComponets.repositorioSolicitantes import obtener_solicitante_por_id
-        
-        # Obtener la solicitud
-        solicitud = obtener_solicitud_por_id(emergencia_data.solicitud_id)
-        if not solicitud:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Solicitud con id {emergencia_data.solicitud_id} no encontrada"
-            )
-        
-        # Obtener el solicitante
-        solicitante = obtener_solicitante_por_id(emergencia_data.solicitante_id)
-        if not solicitante:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Solicitante con id {emergencia_data.solicitante_id} no encontrado"
-            )
-        
-        # Crear la entidad Emergencia
-        emergencia = Emergencia(
-            id=None,
-            solicitud=solicitud,
-            estado=emergencia_data.estado,
-            tipoAmbulancia=emergencia_data.tipoAmbulancia,
-            nivelPrioridad=emergencia_data.nivelPrioridad,
-            descripcion=emergencia_data.descripcion,
-            id_operador=emergencia_data.id_operador,
-            solicitante=solicitante
-        )
-        
-        creada = ServicioEmergencia.crear(emergencia)
-        if creada is None:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Error al crear la emergencia. Verifique que todos los IDs sean válidos."
-            )
-        
-        # Notificar a los solicitantes sobre la nueva emergencia
-        # Usar mode='json' para convertir date/datetime a strings serializables
-        await notificar_emergencia_evaluada(creada.solicitante.id, creada.model_dump(mode='json'))
-        
-        return creada
     except HTTPException:
         raise
     except ValueError as ve:

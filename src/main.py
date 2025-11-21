@@ -10,6 +10,7 @@ from src.api.operadorAmbulancia import operadores_ambulancia_router
 from src.api.websocketOpEmergencias import websocket_router
 from src.api.websocketSolicitantes import websocket_solicitantes_router
 from src.api.emergencias import emergencias_router
+from src.api.evaluarEmergencia import evaluar_emergencia_router
 from src.api.ubicaciones import ubicaciones_router
 from src.api.solicitudes import solicitudes_router
 from src.api.salas import salas_router
@@ -54,20 +55,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#routers security
 app.include_router(auth_router)
 app.include_router(usuarios_router)
+
+#routers solicitantes
 app.include_router(solicitantes_router)
+app.include_router(solicitudes_router)
+app.include_router(recibir_notificaciones_router)
+
+#routers operadores de emergencia
 app.include_router(operadores_emergencia_router)
+app.include_router(atender_emergencias_router)
 app.include_router(operadores_ambulancia_router)
+app.include_router(salas_router)
+app.include_router(evaluar_emergencia_router)
 app.include_router(emergencias_router)
+
+
 app.include_router(ambulancias_router)
 app.include_router(websocket_router)
 app.include_router(websocket_solicitantes_router)
 # app.include_router(ubicaciones_router)
-app.include_router(solicitudes_router)
-app.include_router(recibir_notificaciones_router)
-app.include_router(salas_router)
-app.include_router(atender_emergencias_router)
 @app.get("/")
 def read_root():
     """Endpoint raíz para verificar que la API está funcionando."""

@@ -41,11 +41,13 @@ class ProcesarUbicacionAmbulancia:
             raise ValueError(f"Ambulancia con id {id_ambulancia} no encontrada")
 
         # Guardar ubicación en Redis (última ubicación en memoria)
+        # Incluir tipo de ambulancia para filtrado rápido
         try:
             ServicioUbicacionCache.guardar_ubicacion(
                 id_ambulancia=id_ambulancia,
                 latitud=latitud,
                 longitud=longitud,
+                tipo_ambulancia=ambulancia.tipoAmbulancia.value,
                 timestamp=datetime.now(timezone.utc)
             )
         except redis.RedisError as e:

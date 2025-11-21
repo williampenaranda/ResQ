@@ -32,15 +32,18 @@ class ServicioUbicacionCache:
         id_ambulancia: int,
         latitud: float,
         longitud: float,
+        tipo_ambulancia: str,
         timestamp: Optional[datetime] = None
     ) -> None:
         """
         Guarda la última ubicación de una ambulancia en Redis.
+        Incluye el tipo de ambulancia para filtrado rápido sin consultar BD.
         
         Args:
             id_ambulancia: ID de la ambulancia
             latitud: Latitud de la ubicación
             longitud: Longitud de la ubicación
+            tipo_ambulancia: Tipo de ambulancia (BASICA, MEDICALIZADA)
             timestamp: Timestamp de la ubicación (si None, usa el actual)
             
         Raises:
@@ -49,10 +52,11 @@ class ServicioUbicacionCache:
         if timestamp is None:
             timestamp = datetime.now(timezone.utc)
         
-        # Preparar datos como JSON
+        # Preparar datos como JSON (incluye tipo para filtrado rápido)
         datos = {
             "latitud": latitud,
             "longitud": longitud,
+            "tipoAmbulancia": tipo_ambulancia,
             "timestamp": timestamp.isoformat()
         }
         

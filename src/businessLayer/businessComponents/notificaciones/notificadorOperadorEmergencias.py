@@ -3,13 +3,12 @@ Componente de comunicación para notificar eventos relacionados con emergencias
 a través del WebSocket de operadores de emergencia.
 """
 
-import json
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from src.businessLayer.businessComponents.notificaciones.notificador import notificador
+from src.businessLayer.businessComponents.notificaciones.estrategias import EstrategiaBroadcast
 
-# Manager específico para operadores de emergencia
-manager_operadores_emergencia = notificador()
+# Manager específico para operadores de emergencia con estrategia de broadcast
+manager_operadores_emergencia = notificador(estrategia=EstrategiaBroadcast())
 
 
 async def notificar_nueva_solicitud(nombre_sala: str, datos_solicitud: Dict[str, Any]):
@@ -21,17 +20,13 @@ async def notificar_nueva_solicitud(nombre_sala: str, datos_solicitud: Dict[str,
         nombre_sala: Nombre de la sala creada para la emergencia.
         datos_solicitud: Diccionario con la información de la solicitud.
     """
-    message = json.dumps({
-        "type": "nueva_solicitud",
-        "data": {
+    await manager_operadores_emergencia.notificar(
+        tipo="nueva_solicitud",
+        datos={
             **datos_solicitud,
             "room": nombre_sala
-        },
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    })
-    
-    # Broadcast a todos los conectados al endpoint de emergencias
-    await manager_operadores_emergencia.broadcast(message)
+        }
+    )
 
 
 async def notificar_sala_atendida(nombre_sala: str):
@@ -42,17 +37,13 @@ async def notificar_sala_atendida(nombre_sala: str):
     Args:
         nombre_sala: Nombre de la sala que ha sido atendida.
     """
-    message = json.dumps({
-        "type": "sala_atendida",
-        "data": {
+    await manager_operadores_emergencia.notificar(
+        tipo="sala_atendida",
+        datos={
             "room": nombre_sala,
             "estado": "atendida"
-        },
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    })
-    
-    # Broadcast a todos los conectados al endpoint de emergencias
-    await manager_operadores_emergencia.broadcast(message)
+        }
+    )
 
 
 def get_manager_operadores_emergencia() -> notificador:

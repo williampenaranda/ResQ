@@ -1,25 +1,58 @@
 from fastapi import WebSocket
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, TYPE_CHECKING
 from collections import defaultdict
+
+if TYPE_CHECKING:
+    from .estrategiaNotificacion import EstrategiaNotificacion
 
 class notificador:
     """
     Componente de notificaciones para gestionar conexiones WebSocket asociadas a IDs.
+    Usa una estrategia para definir cómo se envían las notificaciones.
     
     Permite:
     - Asociar conexiones con IDs (usuario_id, ambulancia_id, etc.)
     - Listar conexiones por ID
     - Enviar mensajes a un ID específico
     - Enviar mensajes a todos (broadcast)
+    - Usar estrategias para definir el comportamiento de notificación
     """
     
-    def __init__(self):
+    def __init__(self, estrategia: Optional['EstrategiaNotificacion'] = None):
         # Diccionario que mapea ID -> Lista de WebSockets
         self.conexiones_por_id: Dict[int, List[WebSocket]] = defaultdict(list)
         # Diccionario inverso: WebSocket -> ID (para desconexión rápida)
         self.id_por_conexion: Dict[WebSocket, int] = {}
         # Set de todas las conexiones activas (para broadcast rápido)
         self.conexiones_activas: Set[WebSocket] = set()
+        # Estrategia de notificación
+        self.estrategia: Optional['EstrategiaNotificacion'] = estrategia
+    
+    def set_estrategia(self, estrategia: 'EstrategiaNotificacion'):
+        """
+        Cambia la estrategia de notificación en tiempo de ejecución.
+        
+        Args:
+            estrategia: Nueva estrategia de notificación a usar
+        """
+        self.estrategia = estrategia
+    
+    async def notificar(self, tipo: str, datos: Dict, **kwargs):
+        """
+        Envía una notificación usando la estrategia configurada.
+        
+        Args:
+            tipo: Tipo de notificación (ej: "nueva_solicitud", "solicitud_creada")
+            datos: Datos de la notificación
+            **kwargs: Parámetros adicionales para la estrategia (ej: entity_id, entity_ids)
+        
+        Raises:
+            ValueError: Si no se ha configurado una estrategia de notificación
+        """
+        if not self.estrategia:
+            raise ValueError("No se ha configurado una estrategia de notificación. Use set_estrategia() o pase una estrategia en el constructor.")
+        
+        await self.estrategia.enviar(self, tipo, datos, **kwargs)
 
     async def connect(self, websocket: WebSocket, entity_id: Optional[int] = None):
         """

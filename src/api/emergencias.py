@@ -11,6 +11,7 @@ from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPriorid
 from src.businessLayer.businessComponents.entidades.servicioEmergencia import ServicioEmergencia
 from src.api.security import require_auth, require_role
 from src.security.entities.Usuario import TipoUsuario
+from src.businessLayer.businessComponents.notificaciones.notificadorSolicitante import notificar_emergencia_evaluada
 
 emergencias_router = APIRouter(
     prefix="/emergencias",
@@ -147,7 +148,7 @@ def obtener_emergencia_por_solicitud(
     summary="Crear emergencia",
     description="Crea una nueva emergencia y retorna el recurso creado con su ID asignado. Solo OPERADOR_EMERGENCIA y ADMINISTRADOR pueden crear emergencias.",
 )
-def crear_emergencia(
+async def crear_emergencia(
     emergencia_data: EmergenciaCreate = Body(...),
     payload: dict = Depends(require_role([TipoUsuario.OPERADOR_EMERGENCIA, TipoUsuario.ADMINISTRADOR]))
 ):
@@ -193,6 +194,10 @@ def crear_emergencia(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Error al crear la emergencia. Verifique que todos los IDs sean válidos."
             )
+        
+        # Notificar a los solicitantes sobre la nueva emergencia
+        await notificar_emergencia_evaluada(emergencia.solicitante.id, emergencia.model_dump())
+        
         return creada
     except HTTPException:
         raise

@@ -7,6 +7,7 @@ from src.api.solicitantes import solicitantes_router
 from src.api.operadorEmergencia import operadores_emergencia_router
 from src.api.operadorAmbulancia import operadores_ambulancia_router
 from src.api.websocketOpEmergencias import websocket_router
+from src.api.websocketSolicitantes import websocket_solicitantes_router
 from src.api.emergencias import emergencias_router
 from src.api.ubicaciones import ubicaciones_router
 from src.api.solicitudes import solicitudes_router
@@ -14,6 +15,7 @@ from src.api.salas import salas_router
 from src.businessLayer.businessComponents.llamadas.configLiveKit import ensure_livekit_healthcheck
 from src.api.atenderEmergencias import atender_emergencias_router
 from src.api.ambulancias import ambulancias_router
+from src.api.recibirNotificaciones import recibir_notificaciones_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -50,10 +52,12 @@ app.include_router(operadores_ambulancia_router)
 app.include_router(emergencias_router)
 app.include_router(ambulancias_router)
 app.include_router(websocket_router)
+app.include_router(websocket_solicitantes_router)
 # app.include_router(ubicaciones_router)
 app.include_router(solicitudes_router)
 app.include_router(salas_router)
 app.include_router(atender_emergencias_router)
+app.include_router(recibir_notificaciones_router)
 @app.get("/")
 def read_root():
     """Endpoint raíz para verificar que la API está funcionando."""

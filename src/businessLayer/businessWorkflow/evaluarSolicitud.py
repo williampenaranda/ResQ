@@ -18,7 +18,6 @@ class EvaluarSolicitud:
     @staticmethod
     async def evaluar_solicitud(
         solicitud_id: int,
-        estado,
         tipo_ambulancia,
         nivel_prioridad,
         descripcion: str,
@@ -27,10 +26,10 @@ class EvaluarSolicitud:
     ) -> Emergencia:
         """
         Evalúa una solicitud y crea una emergencia, luego notifica al solicitante.
+        El estado se establece automáticamente como VALORADA (evaluada).
 
         Args:
             solicitud_id: ID de la solicitud a evaluar
-            estado: Estado de la emergencia (EstadoEmergencia)
             tipo_ambulancia: Tipo de ambulancia requerida (TipoAmbulancia)
             nivel_prioridad: Nivel de prioridad (NivelPrioridad)
             descripcion: Descripción de la emergencia
@@ -48,9 +47,10 @@ class EvaluarSolicitud:
         from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
         from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
 
+        # El estado se establece automáticamente como VALORADA (evaluada)
+        estado = EstadoEmergencia.VALORADA
+
         # Validar que los enums sean del tipo correcto
-        if not isinstance(estado, EstadoEmergencia):
-            raise ValueError(f"El estado debe ser una instancia de EstadoEmergencia, recibido: {type(estado)}")
         if not isinstance(tipo_ambulancia, TipoAmbulancia):
             raise ValueError(f"El tipo de ambulancia debe ser una instancia de TipoAmbulancia, recibido: {type(tipo_ambulancia)}")
         if not isinstance(nivel_prioridad, NivelPrioridad):

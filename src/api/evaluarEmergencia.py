@@ -5,7 +5,6 @@ Router para evaluar solicitudes y crear emergencias.
 from fastapi import APIRouter, Body, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 from src.businessLayer.businessEntities.emergencia import Emergencia
-from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmergencia
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
 from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
 from src.businessLayer.businessWorkflow.evaluarSolicitud import EvaluarSolicitud
@@ -22,7 +21,6 @@ evaluar_emergencia_router = APIRouter(
 class EvaluarSolicitudRequest(BaseModel):
     """Modelo de request para evaluar una solicitud y crear una emergencia."""
     solicitud_id: int = Field(..., gt=0, description="ID de la solicitud")
-    estado: EstadoEmergencia = Field(..., description="Estado de la emergencia")
     tipoAmbulancia: TipoAmbulancia = Field(..., description="Tipo de ambulancia requerida")
     nivelPrioridad: NivelPrioridad = Field(..., description="Nivel de prioridad")
     descripcion: str = Field(..., min_length=1, description="Descripción de la emergencia")
@@ -52,7 +50,6 @@ async def evaluar_solicitud(
     try:
         emergencia_creada = await EvaluarSolicitud.evaluar_solicitud(
             solicitud_id=evaluacion_data.solicitud_id,
-            estado=evaluacion_data.estado,
             tipo_ambulancia=evaluacion_data.tipoAmbulancia,
             nivel_prioridad=evaluacion_data.nivelPrioridad,
             descripcion=evaluacion_data.descripcion,

@@ -25,8 +25,9 @@ async def websocket_operadores_emergencia(websocket: WebSocket):
     Permite comunicación en tiempo real relacionada con operadores de emergencia.
     Los operadores se conectan aquí para recibir notificaciones de nuevas solicitudes.
     """
-    await manager_operadores_emergencia.connect(websocket)
     try:
+        await manager_operadores_emergencia.connect(websocket)
+        
         # Enviar mensaje de bienvenida
         await manager_operadores_emergencia.send_personal_message(
             json.dumps({
@@ -47,4 +48,11 @@ async def websocket_operadores_emergencia(websocket: WebSocket):
                 
     except WebSocketDisconnect:
         manager_operadores_emergencia.disconnect(websocket)
+    except Exception as e:
+        # Log del error para debugging
+        print(f"Error en websocket de operadores de emergencia: {e}")
+        try:
+            manager_operadores_emergencia.disconnect(websocket)
+        except:
+            pass
 

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from src.dataLayer.bd import inicializar_base_datos, engine
 from src.api.usuarios import usuarios_router
@@ -44,6 +45,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Configurar CORS para permitir conexiones WebSocket
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # En producción, especifica los orígenes permitidos
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth_router)
 app.include_router(usuarios_router)
 app.include_router(solicitantes_router)
@@ -55,9 +65,9 @@ app.include_router(websocket_router)
 app.include_router(websocket_solicitantes_router)
 # app.include_router(ubicaciones_router)
 app.include_router(solicitudes_router)
+app.include_router(recibir_notificaciones_router)
 app.include_router(salas_router)
 app.include_router(atender_emergencias_router)
-app.include_router(recibir_notificaciones_router)
 @app.get("/")
 def read_root():
     """Endpoint raíz para verificar que la API está funcionando."""

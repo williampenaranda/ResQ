@@ -150,7 +150,7 @@ def obtener_emergencia_por_solicitud(
 )
 async def crear_emergencia(
     emergencia_data: EmergenciaCreate = Body(...),
-    payload: dict = Depends(require_role([TipoUsuario.OPERADOR_EMERGENCIA, TipoUsuario.ADMINISTRADOR]))
+    payload: dict = Depends(require_auth)
 ):
     """
     Crea una nueva emergencia.
@@ -196,7 +196,8 @@ async def crear_emergencia(
             )
         
         # Notificar a los solicitantes sobre la nueva emergencia
-        await notificar_emergencia_evaluada(emergencia.solicitante.id, emergencia.model_dump())
+        # Usar mode='json' para convertir date/datetime a strings serializables
+        await notificar_emergencia_evaluada(creada.solicitante.id, creada.model_dump(mode='json'))
         
         return creada
     except HTTPException:

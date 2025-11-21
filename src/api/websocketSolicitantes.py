@@ -33,9 +33,10 @@ async def websocket_solicitante(
         websocket: Conexión WebSocket.
         id_solicitante: ID del solicitante que se conecta.
     """
-    # Conectar el websocket asociado al ID del solicitante
-    await manager_solicitantes.connect(websocket, entity_id=id_solicitante)
     try:
+        # Conectar el websocket asociado al ID del solicitante
+        await manager_solicitantes.connect(websocket, entity_id=id_solicitante)
+        
         # Enviar mensaje de bienvenida
         await manager_solicitantes.send_personal_message(
             json.dumps({
@@ -58,4 +59,11 @@ async def websocket_solicitante(
                 
     except WebSocketDisconnect:
         manager_solicitantes.disconnect(websocket)
+    except Exception as e:
+        # Log del error para debugging
+        print(f"Error en websocket de solicitante {id_solicitante}: {e}")
+        try:
+            manager_solicitantes.disconnect(websocket)
+        except:
+            pass
 

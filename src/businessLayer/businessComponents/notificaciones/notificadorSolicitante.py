@@ -11,17 +11,17 @@ from src.businessLayer.businessComponents.notificaciones.estrategias import Estr
 manager_solicitantes = notificador(estrategia=EstrategiaPorID())
 
 
-async def notificar_estado_Emergencia(id_solicitante: int, estado: str, datos: Dict[str, Any]):
+async def notificar_estado_Emergencia(id_solicitante: int, tipo: str, datos: Dict[str, Any]):
     """
     Notifica a un solicitante específico sobre cambios en el estado de su solicitud.
 
     Args:
         id_solicitante: ID del solicitante destinatario.
-        estado: Estado de la emergencia (ej: "evaluada", "asignada ", "resuelta").
+        tipo: Tipo de notificación (ej: "evaluada", "asignada ", "resuelta").
         datos: Diccionario con la información de la notificación.
     """
     await manager_solicitantes.notificar(
-        estado=estado,
+        tipo=tipo,
         datos=datos,
         entity_id=id_solicitante
     )
@@ -37,7 +37,7 @@ async def notificar_emergencia_evaluada(id_solicitante: int, datos_emergencia: D
     """
     await notificar_estado_Emergencia(
         id_solicitante=id_solicitante,
-        estado="EVALUADA",
+        tipo="EstadoEmergencia.EVALUADA",
         datos=datos_emergencia
     )
 

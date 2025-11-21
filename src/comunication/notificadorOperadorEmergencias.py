@@ -1,6 +1,6 @@
 """
 Componente de comunicación para notificar eventos relacionados con emergencias
-a través del WebSocket de emergencias.
+a través del WebSocket de operadores de emergencia.
 """
 
 import json
@@ -8,8 +8,8 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 from src.comunication.conexionWebsocket import ConnectionManager
 
-# Manager específico para emergencias
-manager_emergencias = ConnectionManager()
+# Manager específico para operadores de emergencia
+manager_operadores_emergencia = ConnectionManager()
 
 
 async def notificar_nueva_solicitud(nombre_sala: str, datos_solicitud: Dict[str, Any]):
@@ -31,7 +31,7 @@ async def notificar_nueva_solicitud(nombre_sala: str, datos_solicitud: Dict[str,
     })
     
     # Broadcast a todos los conectados al endpoint de emergencias
-    await manager_emergencias.broadcast(message)
+    await manager_operadores_emergencia.broadcast(message)
 
 
 async def notificar_sala_atendida(nombre_sala: str):
@@ -52,15 +52,15 @@ async def notificar_sala_atendida(nombre_sala: str):
     })
     
     # Broadcast a todos los conectados al endpoint de emergencias
-    await manager_emergencias.broadcast(message)
+    await manager_operadores_emergencia.broadcast(message)
 
 
-def get_manager_emergencias() -> ConnectionManager:
+def get_manager_operadores_emergencia() -> ConnectionManager:
     """
-    Obtiene el manager de conexiones de emergencias.
+    Obtiene el manager de conexiones de operadores de emergencia.
     
     Returns:
-        ConnectionManager: Instancia del manager de conexiones de emergencias.
+        ConnectionManager: Instancia del manager de conexiones de operadores de emergencia.
     """
-    return manager_emergencias
+    return manager_operadores_emergencia
 

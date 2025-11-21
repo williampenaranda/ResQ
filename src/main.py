@@ -6,7 +6,7 @@ from src.api.auth import auth_router
 from src.api.solicitantes import solicitantes_router
 from src.api.operadorEmergencia import operadores_emergencia_router
 from src.api.operadorAmbulancia import operadores_ambulancia_router
-from src.api.websocketEmergencias import websocket_router
+from src.api.websocketOpEmergencias import websocket_router
 from src.api.emergencias import emergencias_router
 from src.api.ubicaciones import ubicaciones_router
 from src.api.solicitudes import solicitudes_router

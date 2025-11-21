@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Body, HTTPException, status, Query, Path, Depends
+from fastapi import APIRouter, Body, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional, List
 from src.businessLayer.businessWorkflow.solicitarAmbulancia import SolicitarAmbulancia
-from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
 from src.api.security import require_auth
 
 solicitudes_router = APIRouter(
@@ -13,26 +11,13 @@ solicitudes_router = APIRouter(
 )
 
 
-class SolicitanteRequest(BaseModel):
-    id: int = Field(..., description="ID del solicitante en el sistema")
-    nombre: str = Field(..., min_length=1, description="Primer nombre")
-    apellido: str = Field(..., min_length=1, description="Primer apellido")
-    fechaNacimiento: datetime = Field(..., description="Fecha de nacimiento")
-    tipoDocumento: TipoDocumento = Field(..., description="Tipo de documento")
-    numeroDocumento: str = Field(..., min_length=1, description="Número de documento")
-    nombre2: Optional[str] = Field(None, description="Segundo nombre")
-    apellido2: Optional[str] = Field(None, description="Segundo apellido")
-    padecimientos: Optional[List[str]] = Field(default_factory=list, description="Lista de padecimientos relevantes")
-
 class UbicacionRequest(BaseModel):
     latitud: float = Field(..., ge=-90, le=90, description="Latitud GPS")
     longitud: float = Field(..., ge=-180, le=180, description="Longitud GPS")
-    fechaHora: Optional[datetime] = Field(default_factory=datetime.utcnow, description="Fecha/hora de captura")
 
 class SolicitudRequest(BaseModel):
-    solicitante: SolicitanteRequest = Field(..., description="Datos del solicitante")
+    id_solicitante: int = Field(..., gt=0, description="ID del solicitante en el sistema")
     ubicacion: UbicacionRequest = Field(..., description="Ubicación del incidente")
-    fechaHora: Optional[datetime] = Field(default_factory=datetime.utcnow, description="Fecha/hora de la solicitud")
 
 class SolicitarAmbulanciaResponse(BaseModel):
     room: str = Field(..., description="Nombre de la sala creada/asignada en LiveKit")
@@ -56,7 +41,8 @@ class ErrorResponse(BaseModel):
     description=(
         "Crea una sala de LiveKit para la emergencia, genera identidad y token para el solicitante, "
         "y retorna la información necesaria para unirse a la llamada. "
-        "La identidad del participante y el nombre de la sala se generan automáticamente."
+        "El solicitante se obtiene desde la base de datos usando el ID proporcionado. "
+        "La fecha/hora de la solicitud y ubicación se generan automáticamente."
     ),
 )
 async def solicitar_ambulancia(
@@ -66,15 +52,7 @@ async def solicitar_ambulancia(
             "ejemploBasico": {
                 "summary": "Solicitud mínima",
                 "value": {
-                    "solicitante": {
-                        "id": 1,
-                        "nombre": "Juan",
-                        "apellido": "Pérez",
-                        "fechaNacimiento": "1990-05-10",
-                        "tipoDocumento": "CC",
-                        "numeroDocumento": "1234567890",
-                        "padecimientos": ["hipertensión"]
-                    },
+                    "id_solicitante": 1,
                     "ubicacion": {
                         "latitud": 4.7110,
                         "longitud": -74.0721
@@ -86,37 +64,44 @@ async def solicitar_ambulancia(
 ) -> SolicitarAmbulanciaResponse:
     """
     Procesa la solicitud de ambulancia y retorna credenciales para la llamada en LiveKit.
+    
+    El backend gestiona automáticamente:
+    - Obtención del solicitante desde la base de datos
+    - Creación de la ubicación con fecha/hora actual
+    - Creación de la solicitud con fecha/hora actual
     """
     try:
-        # Adaptación mínima al workflow interno:
-        # El workflow espera un objeto `Solicitud` interno; aquí usamos el request API:
-        from src.businessLayer.businessEntities.solicitante import Solicitante
+        from src.businessLayer.businessComponents.entidades.servicioSolicitante import ServicioSolicitante
         from src.businessLayer.businessEntities.ubicacion import Ubicacion
         from src.businessLayer.businessEntities.solicitud import Solicitud
 
-        solicitante_be = Solicitante.model_validate(
-            solicitud.solicitante.model_dump() if hasattr(solicitud.solicitante, "model_dump") else solicitud.solicitante
-        )
-        ubicacion_be = Ubicacion.model_validate(
-            solicitud.ubicacion.model_dump() if hasattr(solicitud.ubicacion, "model_dump") else solicitud.ubicacion
-        )
-        solicitante_id = (
-            getattr(solicitud.solicitante, "id", None)
-            if not isinstance(solicitud.solicitante, dict)
-            else solicitud.solicitante.get("id")
+        # Obtener el solicitante desde la base de datos
+        solicitante = ServicioSolicitante.obtener_por_id(solicitud.id_solicitante)
+        if not solicitante:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Solicitante con ID {solicitud.id_solicitante} no encontrado"
+            )
+
+        # Crear la ubicación con fecha/hora actual
+        fecha_hora_actual = datetime.utcnow()
+        ubicacion_be = Ubicacion(
+            id=None,
+            latitud=solicitud.ubicacion.latitud,
+            longitud=solicitud.ubicacion.longitud,
+            fechaHora=fecha_hora_actual
         )
 
+        # Crear la solicitud con fecha/hora actual
         solicitud_be = Solicitud(
-            id=solicitante_id or solicitante_be.id,
-            solicitante=solicitante_be,
-            fechaHora=solicitud.fechaHora or datetime.utcnow(),
-            ubicacion=ubicacion_be,
+            id=None,
+            solicitante=solicitante,
+            fechaHora=fecha_hora_actual,
+            ubicacion=ubicacion_be
         )
 
-        result = await SolicitarAmbulancia.registrarSolicitud(solicitud_be.model_dump(mode="json"))
-
-        # La notificación se hace dentro del workflow SolicitarAmbulancia
-        # No es necesario notificar aquí, ya se hace en el workflow
+        # Procesar la solicitud a través del workflow
+        result = await SolicitarAmbulancia.registrarSolicitud(solicitud_be)
 
         return SolicitarAmbulanciaResponse(**result)
 

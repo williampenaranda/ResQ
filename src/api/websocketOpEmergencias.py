@@ -6,7 +6,7 @@ en tiempo real relacionada con emergencias.
 """
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from src.comunication.notificadorOperadorEmergencias import get_manager_operadores_emergencia
+from src.businessLayer.businessComponents.notificaciones.notificadorOperadorEmergencias import get_manager_operadores_emergencia
 import json
 
 # Obtener el manager de operadores de emergencia desde el módulo de notificación

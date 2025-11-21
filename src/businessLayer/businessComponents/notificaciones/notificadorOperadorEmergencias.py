@@ -6,10 +6,10 @@ a través del WebSocket de operadores de emergencia.
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
-from src.comunication.conexionWebsocket import ConnectionManager
+from src.businessLayer.businessComponents.notificaciones.notificador import notificador
 
 # Manager específico para operadores de emergencia
-manager_operadores_emergencia = ConnectionManager()
+manager_operadores_emergencia = notificador()
 
 
 async def notificar_nueva_solicitud(nombre_sala: str, datos_solicitud: Dict[str, Any]):
@@ -55,12 +55,12 @@ async def notificar_sala_atendida(nombre_sala: str):
     await manager_operadores_emergencia.broadcast(message)
 
 
-def get_manager_operadores_emergencia() -> ConnectionManager:
+def get_manager_operadores_emergencia() -> notificador:
     """
     Obtiene el manager de conexiones de operadores de emergencia.
     
     Returns:
-        ConnectionManager: Instancia del manager de conexiones de operadores de emergencia.
+        notificador: Instancia del manager de conexiones de operadores de emergencia.
     """
     return manager_operadores_emergencia
 

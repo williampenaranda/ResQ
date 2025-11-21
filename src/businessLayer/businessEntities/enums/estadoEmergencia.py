@@ -5,5 +5,4 @@ class EstadoEmergencia(enum.Enum):
     VALORADA = "VALORADA"
     ASIGNADA = "ASIGNADA"
     RESUELTA = "RESUELTA"
-    CERRADA = "CERRADA"
     CANCELADA = "CANCELADA"

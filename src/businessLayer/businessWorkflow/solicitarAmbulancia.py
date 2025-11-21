@@ -8,7 +8,7 @@ from src.businessLayer.businessComponents.llamadas.configLiveKit import (
     LIVEKIT_URL,
     validate_livekit_config,
 )
-from src.comunication.notificadorOperadorEmergencias import notificar_nueva_solicitud
+from src.businessLayer.businessComponents.notificaciones.notificadorOperadorEmergencias import notificar_nueva_solicitud
 import uuid
 
 class SolicitarAmbulancia:

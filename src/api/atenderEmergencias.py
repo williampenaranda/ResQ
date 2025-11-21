@@ -41,12 +41,12 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
     - Ejemplos de mensajes
     - Ejemplo de código para conectarse
     """
-    from src.comunication.notificadorOperadorEmergencias import get_manager_operadores_emergencia
+    from src.businessLayer.businessComponents.notificaciones.notificadorOperadorEmergencias import get_manager_operadores_emergencia
     
     manager_operadores_emergencia = get_manager_operadores_emergencia()
     
     # Obtener el número de conexiones activas
-    conexiones_activas = manager_operadores_emergencia.get_active_connections_count()
+    conexiones_activas = manager_operadores_emergencia.get_conexiones_activas_count()
     
     # Construir la URL del WebSocket (asumiendo que se ejecuta en localhost:8000 por defecto)
     # En producción, esto debería venir de una variable de entorno
@@ -70,7 +70,7 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
     elif not base_url.startswith("ws://") and not base_url.startswith("wss://"):
         base_url = f"ws://{base_url}"
     
-    websocket_url = f"{base_url}/ws/emergencias"
+    websocket_url = f"{base_url}/ws/operadores-emergencia"
     
     return WebSocketInfoResponse(
         websocket_url=websocket_url,

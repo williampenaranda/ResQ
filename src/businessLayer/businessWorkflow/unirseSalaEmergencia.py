@@ -8,7 +8,7 @@ from src.businessLayer.businessComponents.llamadas.configLiveKit import (
     LIVEKIT_URL,
     validate_livekit_config,
 )
-from src.comunication.notificadorOperadorEmergencias import notificar_sala_atendida
+from src.businessLayer.businessComponents.notificaciones.notificadorOperadorEmergencias import notificar_sala_atendida
 
 
 class UnirseSalaEmergencia:

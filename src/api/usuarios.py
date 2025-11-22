@@ -65,6 +65,42 @@ async def crear_usuario(usuario_data: UsuarioCreate = Body(...)):
         # Error interno
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+@usuarios_router.get(
+    "/me",
+    response_model=IdPersonaResponse,
+    summary="Obtener id_persona del usuario autenticado",
+    description="Retorna el id_persona del usuario autenticado mediante el bearer token."
+)
+async def obtener_id_persona_me(
+    payload: dict = Depends(require_auth)
+):
+    """
+    Obtiene el id_persona del usuario autenticado a partir del token JWT.
+    Requiere autenticación mediante bearer token.
+    """
+    try:
+        # Obtener el id del usuario desde el payload del token
+        usuario_id = payload.get("id")
+        if not usuario_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token inválido: no se pudo obtener el ID del usuario"
+            )
+        
+        # Obtener el usuario completo desde la base de datos
+        usuario = obtener_usuario_por_id(usuario_id)
+        if not usuario:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Usuario no encontrado"
+            )
+        
+        # Retornar el id_persona (puede ser None si no está asignado)
+        return IdPersonaResponse(id_persona=usuario.id_persona)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @usuarios_router.get(
     "/{id_usuario}",
@@ -153,42 +189,6 @@ async def eliminar_usuario_endpoint(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@usuarios_router.get(
-    "/me",
-    response_model=IdPersonaResponse,
-    summary="Obtener id_persona del usuario autenticado",
-    description="Retorna el id_persona del usuario autenticado mediante el bearer token."
-)
-async def obtener_id_persona_me(
-    payload: dict = Depends(require_auth)
-):
-    """
-    Obtiene el id_persona del usuario autenticado a partir del token JWT.
-    Requiere autenticación mediante bearer token.
-    """
-    try:
-        # Obtener el id del usuario desde el payload del token
-        usuario_id = payload.get("id")
-        if not usuario_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token inválido: no se pudo obtener el ID del usuario"
-            )
-        
-        # Obtener el usuario completo desde la base de datos
-        usuario = obtener_usuario_por_id(usuario_id)
-        if not usuario:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Usuario no encontrado"
-            )
-        
-        # Retornar el id_persona (puede ser None si no está asignado)
-        return IdPersonaResponse(id_persona=usuario.id_persona)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 class AsignarPersonaRequest(BaseModel):

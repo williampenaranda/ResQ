@@ -8,10 +8,9 @@ from src.dataLayer.dataAccesComponets.repositorioUsuarios import (
     listar_usuarios,
     actualizar_usuario,
     eliminar_usuario,
-    actualizarUsuarioPersona,
-    obtener_id_persona_por_credenciales
+    actualizarUsuarioPersona
 )
-from src.api.security import require_role
+from src.api.security import require_role, require_auth
 
 usuarios_router = APIRouter(
     prefix="/usuarios",
@@ -154,36 +153,38 @@ async def eliminar_usuario_endpoint(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-class CredencialesRequest(BaseModel):
-    """Modelo de request para obtener id_persona por credenciales."""
-    email: EmailStr = Field(..., description="Email del usuario")
-    contrasena: str = Field(..., min_length=1, description="Contraseña del usuario")
-
-@usuarios_router.post(
-    "/obtener-id-persona",
+@usuarios_router.get(
+    "/me",
     response_model=IdPersonaResponse,
-    summary="Obtener id_persona por credenciales",
-    description="Dado el email y contraseña del usuario, retorna el id_persona asociado."
+    summary="Obtener id_persona del usuario autenticado",
+    description="Retorna el id_persona del usuario autenticado mediante el bearer token."
 )
-async def obtener_id_persona_por_credenciales_endpoint(
-    credenciales: CredencialesRequest = Body(...)
+async def obtener_id_persona_me(
+    payload: dict = Depends(require_auth)
 ):
+    """
+    Obtiene el id_persona del usuario autenticado a partir del token JWT.
+    Requiere autenticación mediante bearer token.
+    """
     try:
-        id_persona = obtener_id_persona_por_credenciales(
-            email=credenciales.email,
-            contrasena=credenciales.contrasena
-        )
-        if id_persona is None:
-            # Si retorna None, puede ser porque las credenciales son incorrectas
-            # o porque el usuario no tiene id_persona asignado
-            # Por seguridad, no revelamos cuál es el caso
+        # Obtener el id del usuario desde el payload del token
+        usuario_id = payload.get("id")
+        if not usuario_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Credenciales incorrectas o usuario sin persona asignada"
+                detail="Token inválido: no se pudo obtener el ID del usuario"
             )
-        return IdPersonaResponse(id_persona=id_persona)
-    except ValueError as ve:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+        
+        # Obtener el usuario completo desde la base de datos
+        usuario = obtener_usuario_por_id(usuario_id)
+        if not usuario:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Usuario no encontrado"
+            )
+        
+        # Retornar el id_persona (puede ser None si no está asignado)
+        return IdPersonaResponse(id_persona=usuario.id_persona)
     except HTTPException:
         raise
     except Exception as e:

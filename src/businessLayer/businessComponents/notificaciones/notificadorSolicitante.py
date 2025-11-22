@@ -42,6 +42,21 @@ async def notificar_emergencia_evaluada(id_solicitante: int, datos_emergencia: D
     )
 
 
+async def notificar_emergencia_despachada(id_solicitante: int, datos_orden: Dict[str, Any]):
+    """
+    Notifica a un solicitante que se ha despachado una ambulancia para su emergencia.
+
+    Args:
+        id_solicitante: ID del solicitante.
+        datos_orden: Diccionario con la información de la orden de despacho.
+    """
+    await notificar_estado_Emergencia(
+        id_solicitante=id_solicitante,
+        tipo="EstadoEmergencia.DESPACHADA",
+        datos=datos_orden
+    )
+
+
 def get_manager_solicitantes() -> notificador:
     """
     Obtiene el manager de conexiones de solicitantes.

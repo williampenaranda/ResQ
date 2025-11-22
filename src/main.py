@@ -21,6 +21,8 @@ from src.api.ambulancias import ambulancias_router
 from src.api.recibirNotificaciones import recibir_notificaciones_router
 from src.api.websocketAmbulancias import websocket_ambulancias_router
 from src.api.infoWebSocketAmbulancias import info_websocket_ambulancias_router
+from src.api.despacharAmbulancia import despachar_ambulancia_router
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -83,6 +85,7 @@ app.include_router(operadores_ambulancia_router)
 app.include_router(salas_router)
 app.include_router(evaluar_emergencia_router)
 app.include_router(emergencias_router)
+app.include_router(despachar_ambulancia_router)
 
 
 app.include_router(ambulancias_router)
@@ -91,6 +94,7 @@ app.include_router(websocket_solicitantes_router)
 app.include_router(websocket_ambulancias_router)
 app.include_router(info_websocket_ambulancias_router)
 # app.include_router(ubicaciones_router)
+
 @app.get("/")
 def read_root():
     """Endpoint raíz para verificar que la API está funcionando."""

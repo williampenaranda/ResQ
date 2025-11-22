@@ -84,8 +84,8 @@ app.include_router(atender_emergencias_router)
 app.include_router(operadores_ambulancia_router)
 app.include_router(salas_router)
 app.include_router(evaluar_emergencia_router)
-app.include_router(emergencias_router)
 app.include_router(despachar_ambulancia_router)
+app.include_router(emergencias_router)
 
 
 app.include_router(ambulancias_router)

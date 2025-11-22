@@ -16,6 +16,8 @@ websocket_ambulancias_router = APIRouter(
 )
 
 
+from src.businessLayer.businessComponents.notificaciones.notificadorAmbulancia import get_manager_ambulancias
+
 @websocket_ambulancias_router.websocket("/ambulancias/{id_ambulancia}")
 async def websocket_ambulancia(
     websocket: WebSocket,
@@ -41,9 +43,11 @@ async def websocket_ambulancia(
         websocket: Conexión WebSocket.
         id_ambulancia: ID de la ambulancia que se conecta.
     """
+    manager = get_manager_ambulancias()
+    
     try:
-        # Aceptar la conexión
-        await websocket.accept()
+        # Conectar usando el manager (esto hace accept())
+        await manager.connect(websocket, id_ambulancia)
         
         # Marcar la ambulancia como disponible al conectar
         try:
@@ -113,6 +117,9 @@ async def websocket_ambulancia(
                 break
                 
     except WebSocketDisconnect:
+        # Desconectar del manager
+        manager.disconnect(websocket)
+        
         # Marcar la ambulancia como no disponible al desconectar
         try:
             ActualizarDisponibilidadAmbulancia.marcar_como_no_disponible(id_ambulancia)
@@ -121,6 +128,8 @@ async def websocket_ambulancia(
     except Exception as e:
         # Log del error para debugging
         print(f"Error en websocket de ambulancia {id_ambulancia}: {e}")
+        # Desconectar del manager si hubo error
+        manager.disconnect(websocket)
         try:
             # Intentar marcar como no disponible en caso de error
             ActualizarDisponibilidadAmbulancia.marcar_como_no_disponible(id_ambulancia)

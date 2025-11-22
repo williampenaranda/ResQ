@@ -11,6 +11,7 @@ from src.dataLayer.dataAccesComponets.repositorioAmbulancia import obtener_ambul
 from src.dataLayer.dataAccesComponets.repositorioOperadorAmbulancia import obtener_operador_por_id as obtener_operador_ambulancia_por_id
 from src.dataLayer.dataAccesComponets.repositorioOperadorEmergencia import obtener_operador_por_id as obtener_operador_emergencia_por_id
 from src.businessLayer.businessComponents.notificaciones.notificadorSolicitante import notificar_emergencia_despachada
+from src.businessLayer.businessComponents.notificaciones.notificadorAmbulancia import notificar_orden_despacho
 
 
 class EmitirOrdenDespacho:
@@ -96,6 +97,17 @@ class EmitirOrdenDespacho:
         await notificar_emergencia_despachada(
             creada.solicitante.id,
             creada.model_dump(mode='json')
+        )
+
+        # Notificar a la ambulancia seleccionada
+        await notificar_orden_despacho(
+            id_ambulancia=ambulancia_id,
+            datos_orden={
+                "tipo": "nueva_emergencia",
+                "orden_despacho": creada.model_dump(mode='json'),
+                "emergencia": creada.emergencia.model_dump(mode='json'),
+                "ubicacion_emergencia": creada.emergencia.solicitud.ubicacion.model_dump(mode='json')
+            }
         )
 
         return creada

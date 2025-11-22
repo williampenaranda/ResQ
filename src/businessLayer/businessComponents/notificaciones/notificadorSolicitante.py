@@ -27,17 +27,17 @@ async def notificar_estado_Emergencia(id_solicitante: int, tipo: str, datos: Dic
     )
 
 
-async def notificar_emergencia_evaluada(id_solicitante: int, datos_emergencia: Dict[str, Any]):
+async def notificar_emergencia_valorada(id_solicitante: int, datos_emergencia: Dict[str, Any]):
     """
-    Notifica a un solicitante que su emergencia ha sido evaluada.
+    Notifica a un solicitante que su emergencia ha sido valorada.
 
     Args:
         id_solicitante: ID del solicitante.
-        datos_emergencia: Diccionario con la información de la emergencia evaluada.
+        datos_emergencia: Diccionario con la información de la emergencia valorada.
     """
     await notificar_estado_Emergencia(
         id_solicitante=id_solicitante,
-        tipo="EstadoEmergencia.EVALUADA",
+        tipo="EstadoEmergencia.VALORADA",
         datos=datos_emergencia
     )
 

@@ -1,5 +1,5 @@
 """
-Router para evaluar solicitudes y crear emergencias.
+Router para valorar solicitudes y crear emergencias.
 """
 
 from fastapi import APIRouter, Body, HTTPException, status, Depends
@@ -7,19 +7,21 @@ from pydantic import BaseModel, Field
 from src.businessLayer.businessEntities.emergencia import Emergencia
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
 from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
-from src.businessLayer.businessWorkflow.evaluarSolicitud import EvaluarSolicitud
+from src.businessLayer.businessWorkflow.valorarSolicitud import ValorarSolicitud
 from src.api.security import require_auth, require_role
 from src.security.entities.Usuario import TipoUsuario
+from typing import Optional
+from src.businessLayer.businessComponents.entidades.buscarAmbulanciaCercana import BuscarAmbulanciaCercana
 
-evaluar_emergencia_router = APIRouter(
-    prefix="/evaluar-emergencia",
-    tags=["evaluar-emergencia"],
+valorar_emergencia_router = APIRouter(
+    prefix="/valorar-emergencia",
+    tags=["valorar-emergencia"],
     dependencies=[Depends(require_auth)]
 )
 
 
-class EvaluarSolicitudRequest(BaseModel):
-    """Modelo de request para evaluar una solicitud y crear una emergencia."""
+class ValorarSolicitudRequest(BaseModel):
+    """Modelo de request para valorar una solicitud y crear una emergencia."""
     solicitud_id: int = Field(..., gt=0, description="ID de la solicitud")
     tipoAmbulancia: TipoAmbulancia = Field(..., description="Tipo de ambulancia requerida")
     nivelPrioridad: NivelPrioridad = Field(..., description="Nivel de prioridad")
@@ -28,43 +30,40 @@ class EvaluarSolicitudRequest(BaseModel):
     solicitante_id: int = Field(..., gt=0, description="ID del solicitante")
 
 
-from typing import Optional
-from src.businessLayer.businessComponents.entidades.buscarAmbulanciaCercana import BuscarAmbulanciaCercana
-
-class EvaluarEmergenciaResponse(BaseModel):
+class ValorarEmergenciaResponse(BaseModel):
     """Modelo de respuesta que incluye la emergencia creada y la ambulancia más cercana sugerida."""
     emergencia: Emergencia
     id_ambulancia_cercana: Optional[int] = Field(None, description="ID de la ambulancia más cercana disponible")
 
 
-@evaluar_emergencia_router.post(
+@valorar_emergencia_router.post(
     "",
-    response_model=EvaluarEmergenciaResponse,
+    response_model=ValorarEmergenciaResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Evaluar solicitud y crear emergencia",
+    summary="Valorar solicitud y crear emergencia",
     description=(
-        "Evalúa una solicitud y crea una emergencia. "
+        "Valora una solicitud y crea una emergencia. "
         "Este endpoint crea la emergencia, notifica al solicitante y busca la ambulancia más cercana disponible. "
-        "Solo OPERADOR_EMERGENCIA y ADMINISTRADOR pueden evaluar solicitudes."
+        "Solo OPERADOR_EMERGENCIA y ADMINISTRADOR pueden valorar solicitudes."
     ),
 )
-async def evaluar_solicitud(
-    evaluacion_data: EvaluarSolicitudRequest = Body(...),
+async def valorar_solicitud(
+    valoracion_data: ValorarSolicitudRequest = Body(...),
     payload: dict = Depends(require_auth)
 ):
     """
-    Evalúa una solicitud y crea una emergencia.
+    Valora una solicitud y crea una emergencia.
     Requiere que la solicitud, operador y solicitante existan en la base de datos.
     """
     try:
         # 1. Crear la emergencia
-        emergencia_creada = await EvaluarSolicitud.evaluar_solicitud(
-            solicitud_id=evaluacion_data.solicitud_id,
-            tipo_ambulancia=evaluacion_data.tipoAmbulancia,
-            nivel_prioridad=evaluacion_data.nivelPrioridad,
-            descripcion=evaluacion_data.descripcion,
-            id_operador=evaluacion_data.id_operador,
-            solicitante_id=evaluacion_data.solicitante_id
+        emergencia_creada = await ValorarSolicitud.valorar_solicitud(
+            solicitud_id=valoracion_data.solicitud_id,
+            tipo_ambulancia=valoracion_data.tipoAmbulancia,
+            nivel_prioridad=valoracion_data.nivelPrioridad,
+            descripcion=valoracion_data.descripcion,
+            id_operador=valoracion_data.id_operador,
+            solicitante_id=valoracion_data.solicitante_id
         )
         
         # 2. Buscar la ambulancia más cercana
@@ -81,7 +80,7 @@ async def evaluar_solicitud(
             # Solo logueamos el error (aquí print por simplicidad)
             print(f"Error al buscar ambulancia cercana: {e}")
             
-        return EvaluarEmergenciaResponse(
+        return ValorarEmergenciaResponse(
             emergencia=emergencia_creada,
             id_ambulancia_cercana=id_ambulancia_cercana
         )
@@ -92,4 +91,3 @@ async def evaluar_solicitud(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(re))
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-

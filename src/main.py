@@ -10,7 +10,7 @@ from src.api.operadorAmbulancia import operadores_ambulancia_router
 from src.api.websocketOpEmergencias import websocket_router
 from src.api.websocketSolicitantes import websocket_solicitantes_router
 from src.api.emergencias import emergencias_router
-from src.api.evaluarEmergencia import evaluar_emergencia_router
+from src.api.valorarEmergencia import valorar_emergencia_router
 from src.api.ubicaciones import ubicaciones_router
 from src.api.solicitudes import solicitudes_router
 from src.api.salas import salas_router
@@ -83,9 +83,9 @@ app.include_router(operadores_emergencia_router)
 app.include_router(atender_emergencias_router)
 app.include_router(operadores_ambulancia_router)
 app.include_router(salas_router)
-app.include_router(evaluar_emergencia_router)
-app.include_router(despachar_ambulancia_router)
+app.include_router(valorar_emergencia_router)
 app.include_router(emergencias_router)
+app.include_router(despachar_ambulancia_router)
 
 
 app.include_router(ambulancias_router)

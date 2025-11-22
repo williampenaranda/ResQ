@@ -1,5 +1,5 @@
 """
-Workflow para evaluar una solicitud y crear una emergencia.
+Workflow para valorar una solicitud y crear una emergencia.
 Este workflow orquesta la creación de emergencias y las notificaciones correspondientes.
 """
 
@@ -7,16 +7,16 @@ from src.businessLayer.businessEntities.emergencia import Emergencia
 from src.businessLayer.businessComponents.entidades.servicioEmergencia import ServicioEmergencia
 from src.dataLayer.dataAccesComponets.repositorioSolicitudes import obtener_solicitud_por_id
 from src.dataLayer.dataAccesComponets.repositorioSolicitantes import obtener_solicitante_por_id
-from src.businessLayer.businessComponents.notificaciones.notificadorSolicitante import notificar_emergencia_evaluada
+from src.businessLayer.businessComponents.notificaciones.notificadorSolicitante import notificar_emergencia_valorada
 
 
-class EvaluarSolicitud:
+class ValorarSolicitud:
     """
-    Workflow para evaluar una solicitud y crear una emergencia.
+    Workflow para valorar una solicitud y crear una emergencia.
     """
 
     @staticmethod
-    async def evaluar_solicitud(
+    async def valorar_solicitud(
         solicitud_id: int,
         tipo_ambulancia,
         nivel_prioridad,
@@ -25,11 +25,11 @@ class EvaluarSolicitud:
         solicitante_id: int
     ) -> Emergencia:
         """
-        Evalúa una solicitud y crea una emergencia, luego notifica al solicitante.
-        El estado se establece automáticamente como VALORADA (evaluada).
+        Valora una solicitud y crea una emergencia, luego notifica al solicitante.
+        El estado se establece automáticamente como VALORADA.
 
         Args:
-            solicitud_id: ID de la solicitud a evaluar
+            solicitud_id: ID de la solicitud a valorar
             tipo_ambulancia: Tipo de ambulancia requerida (TipoAmbulancia)
             nivel_prioridad: Nivel de prioridad (NivelPrioridad)
             descripcion: Descripción de la emergencia
@@ -47,7 +47,7 @@ class EvaluarSolicitud:
         from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
         from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
 
-        # El estado se establece automáticamente como VALORADA (evaluada)
+        # El estado se establece automáticamente como VALORADA
         estado = EstadoEmergencia.VALORADA
 
         # Validar que los enums sean del tipo correcto
@@ -85,10 +85,9 @@ class EvaluarSolicitud:
 
         # Notificar a los solicitantes sobre la nueva emergencia
         # Usar mode='json' para convertir date/datetime a strings serializables
-        await notificar_emergencia_evaluada(
+        await notificar_emergencia_valorada(
             creada.solicitante.id,
             creada.model_dump(mode='json')
         )
 
         return creada
-

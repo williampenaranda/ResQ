@@ -84,10 +84,13 @@ class ValorarSolicitud:
             raise RuntimeError("Error al crear la emergencia. Verifique que todos los IDs sean válidos.")
 
         # Notificar a los solicitantes sobre la nueva emergencia
-        # Usar mode='json' para convertir date/datetime a strings serializables
+        # Solo enviar el ID y el estado
         await notificar_emergencia_valorada(
             creada.solicitante.id,
-            creada.model_dump(mode='json')
+            {
+                "id": creada.id,
+                "estado": creada.estado.value if hasattr(creada.estado, 'value') else str(creada.estado)
+            }
         )
 
         # Iniciar el envío periódico de información de ambulancias al operador

@@ -90,4 +90,12 @@ class ValorarSolicitud:
             creada.model_dump(mode='json')
         )
 
+        # Iniciar el envío periódico de información de ambulancias al operador
+        from src.businessLayer.businessComponents.notificaciones.gestorTareasAmbulancias import iniciar_envio_ambulancias
+        iniciar_envio_ambulancias(
+            id_operador=id_operador,
+            emergencia_id=creada.id,
+            tipo_ambulancia=tipo_ambulancia
+        )
+
         return creada

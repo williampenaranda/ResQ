@@ -110,4 +110,8 @@ class EmitirOrdenDespacho:
             }
         )
 
+        # Detener el envío periódico de información de ambulancias para esta emergencia
+        from src.businessLayer.businessComponents.notificaciones.gestorTareasAmbulancias import detener_envio_ambulancias
+        detener_envio_ambulancias(emergencia_id=emergencia_id)
+
         return creada

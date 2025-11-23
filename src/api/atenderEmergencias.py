@@ -13,7 +13,7 @@ class WebSocketInfoResponse(BaseModel):
     mensaje_bienvenida: dict = Field(..., description="Estructura del mensaje de bienvenida que se recibe al conectar")
     mensaje_emergencia: dict = Field(..., description="Estructura del mensaje que se recibe cuando hay una nueva emergencia")
     mensaje_sala_atendida: dict = Field(..., description="Estructura del mensaje que se recibe cuando una sala está atendida")
-
+    mensaje_info_ambulancias: dict = Field(..., description="Estructura del mensaje que se recibe con información de ambulancias durante la evaluación")
 
 
 atender_emergencias_router = APIRouter(
@@ -28,7 +28,9 @@ atender_emergencias_router = APIRouter(
     description=(
         "Proporciona información sobre cómo conectarse al WebSocket para recibir notificaciones "
         "de nuevas emergencias en tiempo real. Los operadores deben conectarse a este endpoint "
-        "para recibir alertas cuando se registre una nueva solicitud de ambulancia."
+        "para recibir alertas cuando se registre una nueva solicitud de ambulancia. "
+        "Si se proporciona el parámetro id_operador en la URL, recibirás información de ambulancias "
+        "cada segundo cuando estés evaluando una emergencia."
     ),
 )
 async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
@@ -36,7 +38,7 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
     Retorna información sobre cómo conectarse al WebSocket de emergencias.
     
     Este endpoint proporciona:
-    - La URL del WebSocket
+    - La URL del WebSocket (con parámetro opcional id_operador)
     - El número de conexiones activas
     - Ejemplos de mensajes
     - Ejemplo de código para conectarse
@@ -80,11 +82,14 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
             "Al conectarse, recibirás un mensaje de bienvenida y luego comenzarás a recibir "
             "notificaciones automáticas de: "
             "1) Nuevas solicitudes de ambulancia (tipo: 'nueva_solicitud') con el nombre de la sala, "
-            "2) Salas atendidas cuando se llenan (tipo: 'sala_atendida') con el nombre de la sala + 'atendida'."
+            "2) Salas atendidas cuando se llenan (tipo: 'sala_atendida') con el nombre de la sala + 'atendida', "
+            "3) Información de ambulancias (tipo: 'info_ambulancias') cada segundo cuando estés evaluando una emergencia "
+            "(requiere conectarse con el parámetro id_operador en la URL)."
         ),
         mensaje_bienvenida={
             "type": "connection",
-            "message": "Conectado! listo para recibir emergencias"
+            "message": "Conectado como operador 1! listo para recibir nuevas solicitudes",
+            "id_operador": 1
         },
         mensaje_emergencia={
             "type": "nueva_solicitud",
@@ -114,5 +119,22 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
                 "estado": "atendida"
             },
             "timestamp": "2024-01-15T10:30:00.123456"
+        },
+        mensaje_info_ambulancias={
+            "type": "info_ambulancias",
+            "emergencia_id": 123,
+            "ambulancias": [
+                {
+                    "id": 1,
+                    "latitud": 4.7110,
+                    "longitud": -74.0721
+                },
+                {
+                    "id": 2,
+                    "latitud": 4.7120,
+                    "longitud": -74.0730
+                }
+            ],
+            "timestamp": 1234567890.123
         }
     )

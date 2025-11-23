@@ -8,6 +8,7 @@ class Ambulancia(BaseModel):
     placa: str
     tipoAmbulancia: TipoAmbulancia
     ubicacion: Optional[Ubicacion] = None
+    id_operador_ambulancia: Optional[int] = None
 
     # Analizadores (Getters)
     def get_id(self) -> Optional[int]:
@@ -39,10 +40,19 @@ class Ambulancia(BaseModel):
         """Establece la ubicación de la ambulancia."""
         self.ubicacion = ubicacion
     
+    def get_id_operador_ambulancia(self) -> Optional[int]:
+        """Retorna el ID del operador de ambulancia."""
+        return self.id_operador_ambulancia
+    
+    def set_id_operador_ambulancia(self, id_operador_ambulancia: Optional[int]) -> None:
+        """Establece el ID del operador de ambulancia."""
+        self.id_operador_ambulancia = id_operador_ambulancia
+    
     #Método toString
     def __str__(self) -> str:
         return (f"Ambulancia(id={self.id}, "
                 f"disponibilidad={self.disponibilidad}, "
                 f"placa={self.placa}, "
                 f"tipoAmbulancia={self.tipoAmbulancia}, "
-                f"ubicacion={self.ubicacion})")
+                f"ubicacion={self.ubicacion}, "
+                f"id_operador_ambulancia={self.id_operador_ambulancia})")

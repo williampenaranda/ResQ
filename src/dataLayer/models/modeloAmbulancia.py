@@ -51,6 +51,14 @@ class Ambulancia(Base):
         index=True
     )
 
+    # Relación con operador de ambulancia
+    id_operador_ambulancia = Column(
+        Integer,
+        ForeignKey("operadores_ambulancia.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
+
     # Timestamps
     fechaCreacion = Column(DateTime(timezone=True), default=obtener_fecha_utc, nullable=False)
     fechaActualizacion = Column(

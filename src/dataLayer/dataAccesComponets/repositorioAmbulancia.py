@@ -31,7 +31,8 @@ def _mapear_be_a_db(ambulancia: AmbulanciaBE) -> AmbulanciaDB:
         disponibilidad=ambulancia.get_disponibilidad(),
         placa=ambulancia.get_placa(),
         tipoAmbulancia=ambulancia.tipoAmbulancia,
-        ubicacion_id=ubicacion_id
+        ubicacion_id=ubicacion_id,
+        id_operador_ambulancia=ambulancia.get_id_operador_ambulancia()
     )
 
 
@@ -53,7 +54,8 @@ def _mapear_db_a_be(db_obj: AmbulanciaDB) -> AmbulanciaBE:
         disponibilidad=db_obj.disponibilidad,
         placa=db_obj.placa,
         tipoAmbulancia=TipoAmbulancia(db_obj.tipoAmbulancia) if isinstance(db_obj.tipoAmbulancia, str) else db_obj.tipoAmbulancia,
-        ubicacion=ubicacion
+        ubicacion=ubicacion,
+        id_operador_ambulancia=db_obj.id_operador_ambulancia
     )
     
     return ambulancia
@@ -220,6 +222,44 @@ def eliminar_ambulancia(id_ambulancia: int) -> bool:
     except SQLAlchemyError as e:
         sesion.rollback()
         raise RuntimeError(f"Error al eliminar ambulancia: {e}")
+    finally:
+        sesion.close()
+
+
+def vincular_operador_ambulancia(id_ambulancia: int, id_operador_ambulancia: int) -> Optional[AmbulanciaBE]:
+    """
+    Vincula un operador de ambulancia con una ambulancia.
+    
+    Args:
+        id_ambulancia: ID de la ambulancia
+        id_operador_ambulancia: ID del operador de ambulancia a vincular
+        
+    Returns:
+        Ambulancia actualizada o None si no se encuentra
+    """
+    sesion: Session = SessionLocal()
+    try:
+        db_obj = sesion.get(AmbulanciaDB, id_ambulancia)
+        if not db_obj:
+            return None
+        
+        # Validar que el operador de ambulancia exista
+        from src.dataLayer.dataAccesComponets.repositorioOperadorAmbulancia import obtener_operador_por_id
+        operador = obtener_operador_por_id(id_operador_ambulancia)
+        if not operador:
+            raise ValueError(f"Operador de ambulancia con id {id_operador_ambulancia} no encontrado")
+        
+        # Actualizar el id_operador_ambulancia
+        db_obj.id_operador_ambulancia = id_operador_ambulancia
+        sesion.commit()
+        sesion.refresh(db_obj)
+        return _mapear_db_a_be(db_obj)
+    except ValueError:
+        sesion.rollback()
+        raise
+    except SQLAlchemyError as e:
+        sesion.rollback()
+        raise RuntimeError(f"Error al vincular operador de ambulancia: {e}")
     finally:
         sesion.close()
 

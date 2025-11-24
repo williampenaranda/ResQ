@@ -6,11 +6,13 @@ Este workflow orquesta la creación de órdenes de despacho y las notificaciones
 from datetime import datetime
 from src.businessLayer.businessEntities.ordenDespacho import OrdenDespacho
 from src.businessLayer.businessComponents.entidades.servicioOrdenDespacho import ServicioOrdenDespacho
+from src.businessLayer.businessComponents.entidades.servicioEmergencia import ServicioEmergencia
 from src.dataLayer.dataAccesComponets.repositorioEmergencias import obtener_emergencia_por_id
 from src.dataLayer.dataAccesComponets.repositorioAmbulancia import obtener_ambulancia_por_id
 from src.dataLayer.dataAccesComponets.repositorioOperadorAmbulancia import obtener_operador_por_id as obtener_operador_ambulancia_por_id
 from src.dataLayer.dataAccesComponets.repositorioOperadorEmergencia import obtener_operador_por_id as obtener_operador_emergencia_por_id
 from src.businessLayer.businessComponents.notificaciones.notificadorSolicitante import notificar_emergencia_despachada
+from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmergencia
 from src.businessLayer.businessComponents.notificaciones.notificadorAmbulancia import notificar_orden_despacho
 
 
@@ -94,13 +96,24 @@ class EmitirOrdenDespacho:
         # Notificar a los operadores de emergencia sobre la nueva orden de despacho
         # Usar mode='json' para convertir date/datetime a strings serializables
         
-        solicitante = getattr(creada.emergencia, "solicitante", None)
+        emergencia_asociada = getattr(creada, "emergencia", None)
+        if not emergencia_asociada or emergencia_asociada.id is None:
+            raise RuntimeError("La orden creada no tiene una emergencia asociada con ID válido")
+
+        # Actualizar estado de la emergencia a ASIGNADA
+        ServicioEmergencia.actualizar(emergencia_asociada.id, {"estado": EstadoEmergencia.ASIGNADA})
+
+        solicitante = getattr(emergencia_asociada, "solicitante", None)
         if not solicitante:
             raise RuntimeError("La emergencia asociada a la orden no tiene un solicitante asignado")
 
         await notificar_emergencia_despachada(
             solicitante.id,
-            creada.model_dump(mode='json')
+            {
+                "id": emergencia_asociada.id,
+                "estado": EstadoEmergencia.ASIGNADA.value,
+                "ordenDespacho": creada.model_dump(mode='json')
+            }
         )
 
         # Notificar a la ambulancia seleccionada

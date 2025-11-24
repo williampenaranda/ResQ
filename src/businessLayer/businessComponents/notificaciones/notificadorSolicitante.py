@@ -52,7 +52,7 @@ async def notificar_emergencia_despachada(id_solicitante: int, datos_orden: Dict
     """
     await notificar_estado_Emergencia(
         id_solicitante=id_solicitante,
-        tipo="EstadoEmergencia.DESPACHADA",
+        tipo="EstadoEmergencia.ASIGNADA",
         datos=datos_orden
     )
 

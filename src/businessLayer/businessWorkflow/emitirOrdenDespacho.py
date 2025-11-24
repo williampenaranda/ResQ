@@ -120,15 +120,23 @@ class EmitirOrdenDespacho:
         await notificar_orden_despacho(
             id_ambulancia=ambulancia_id,
             datos_orden={
-                "tipo": "nueva_emergencia",
-                "orden_despacho": creada.model_dump(mode='json'),
-                "emergencia": creada.emergencia.model_dump(mode='json'),
-                "ubicacion_emergencia": creada.emergencia.solicitud.ubicacion.model_dump(mode='json')
+                "ubicacion": creada.emergencia.solicitud.ubicacion.model_dump(mode='json'),
+                "solicitante": creada.emergencia.solicitante.model_dump(mode='json'),
+                "descripcion": creada.emergencia.descripcion,
+                "nivelPrioridad": creada.emergencia.nivelPrioridad.value if hasattr(creada.emergencia.nivelPrioridad, 'value') else str(creada.emergencia.nivelPrioridad)
             }
         )
 
         # Detener el envío periódico de información de ambulancias para esta emergencia
         from src.businessLayer.businessComponents.notificaciones.gestorTareasAmbulancias import detener_envio_ambulancias
         detener_envio_ambulancias(emergencia_id=emergencia_id)
+
+        # Iniciar el envío periódico de la ubicación de la ambulancia asignada al solicitante
+        from src.businessLayer.businessComponents.notificaciones.gestorTareasUbicacionAmbulancia import iniciar_envio_ubicacion_ambulancia
+        iniciar_envio_ubicacion_ambulancia(
+            id_solicitante=solicitante.id,
+            emergencia_id=emergencia_asociada.id,
+            id_ambulancia=ambulancia_id
+        )
 
         return creada

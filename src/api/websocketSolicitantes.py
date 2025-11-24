@@ -56,14 +56,25 @@ async def websocket_solicitante(
                 
             except Exception:
                 break
+        
+        # Si salimos del bucle, desconectar y detener tareas
+        manager_solicitantes.disconnect(websocket)
+        from src.businessLayer.businessComponents.notificaciones.gestorTareasUbicacionAmbulancia import detener_envio_por_solicitante
+        detener_envio_por_solicitante(id_solicitante)
                 
     except WebSocketDisconnect:
         manager_solicitantes.disconnect(websocket)
+        # Verificar si hay tareas de envío de ubicación activas para este solicitante y detenerlas
+        from src.businessLayer.businessComponents.notificaciones.gestorTareasUbicacionAmbulancia import detener_envio_por_solicitante
+        detener_envio_por_solicitante(id_solicitante)
     except Exception as e:
         # Log del error para debugging
         print(f"Error en websocket de solicitante {id_solicitante}: {e}")
         try:
             manager_solicitantes.disconnect(websocket)
+            # Verificar si hay tareas de envío de ubicación activas para este solicitante y detenerlas
+            from src.businessLayer.businessComponents.notificaciones.gestorTareasUbicacionAmbulancia import detener_envio_por_solicitante
+            detener_envio_por_solicitante(id_solicitante)
         except:
             pass
 

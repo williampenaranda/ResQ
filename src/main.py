@@ -81,7 +81,6 @@ app.include_router(recibir_notificaciones_router)
 #routers operadores de emergencia
 app.include_router(operadores_emergencia_router)
 app.include_router(atender_emergencias_router)
-app.include_router(operadores_ambulancia_router)
 app.include_router(salas_router)
 app.include_router(valorar_emergencia_router)
 app.include_router(emergencias_router)
@@ -89,10 +88,11 @@ app.include_router(despachar_ambulancia_router)
 
 
 app.include_router(ambulancias_router)
+app.include_router(operadores_ambulancia_router)
+app.include_router(info_websocket_ambulancias_router)
 app.include_router(websocket_router)
 app.include_router(websocket_solicitantes_router)
 app.include_router(websocket_ambulancias_router)
-app.include_router(info_websocket_ambulancias_router)
 # app.include_router(ubicaciones_router)
 
 @app.get("/")

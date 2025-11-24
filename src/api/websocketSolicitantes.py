@@ -52,7 +52,38 @@ async def websocket_solicitante(
             # Recibir mensajes del cliente (pueden ser pings o comandos)
             try:
                 data = await websocket.receive_text()
-                # Opcional: procesar mensajes del cliente si es necesario
+                
+                # Procesar mensajes del cliente
+                try:
+                    mensaje = json.loads(data)
+                    tipo = mensaje.get("tipo")
+                    
+                    # Si el mensaje es para finalizar una emergencia
+                    if tipo == "emergencia_finalizada":
+                        id_emergencia = mensaje.get("id_emergencia")
+                        
+                        if id_emergencia:
+                            # Actualizar el estado de la emergencia a RESUELTA
+                            from src.businessLayer.businessComponents.entidades.servicioEmergencia import ServicioEmergencia
+                            from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmergencia
+                            
+                            emergencia_actualizada = ServicioEmergencia.actualizar(
+                                id_emergencia,
+                                {"estado": EstadoEmergencia.RESUELTA}
+                            )
+                            
+                            if emergencia_actualizada:
+                                print(f"Emergencia {id_emergencia} finalizada por solicitante {id_solicitante}")
+                            else:
+                                print(f"Error: No se pudo actualizar la emergencia {id_emergencia}")
+                        else:
+                            print(f"Error: Mensaje de emergencia_finalizada sin id_emergencia")
+                
+                except json.JSONDecodeError:
+                    # Si no es JSON válido, ignorar el mensaje
+                    pass
+                except Exception as e:
+                    print(f"Error al procesar mensaje del solicitante {id_solicitante}: {e}")
                 
             except Exception:
                 break

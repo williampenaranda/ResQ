@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Body, Path, Query, Depends
+from fastapi import APIRouter, HTTPException, status, Body, Path, Query
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict, Any
 from src.security.entities.Usuario import Usuario, TipoUsuario
@@ -10,7 +10,6 @@ from src.dataLayer.dataAccesComponets.repositorioUsuarios import (
     eliminar_usuario,
     actualizarUsuarioPersona
 )
-from src.api.security import require_role, require_auth
 
 usuarios_router = APIRouter(
     prefix="/usuarios",
@@ -68,27 +67,19 @@ async def crear_usuario(usuario_data: UsuarioCreate = Body(...)):
 @usuarios_router.get(
     "/me",
     response_model=IdPersonaResponse,
-    summary="Obtener id_persona del usuario autenticado",
-    description="Retorna el id_persona del usuario autenticado mediante el bearer token."
+    summary="Obtener id_persona de un usuario",
+    description="Retorna el id_persona de un usuario utilizando su ID."
 )
 async def obtener_id_persona_me(
-    payload: dict = Depends(require_auth)
+    id_usuario: int = Query(..., gt=0, description="ID del usuario")
 ):
     """
-    Obtiene el id_persona del usuario autenticado a partir del token JWT.
-    Requiere autenticación mediante bearer token.
+    Obtiene el id_persona de un usuario a partir de su ID.
     """
     try:
         # Obtener el id del usuario desde el payload del token
-        usuario_id = payload.get("id")
-        if not usuario_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token inválido: no se pudo obtener el ID del usuario"
-            )
-        
         # Obtener el usuario completo desde la base de datos
-        usuario = obtener_usuario_por_id(usuario_id)
+        usuario = obtener_usuario_por_id(id_usuario)
         if not usuario:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -130,7 +121,6 @@ async def obtener_usuario(
     response_model=List[Usuario],
     summary="Listar usuarios",
     description="Lista usuarios con paginación."
-    #dependencies=[Depends(require_role(TipoUsuario.ADMINISTRADOR))]
 )
 async def listar_usuarios_endpoint(
     limit: int = Query(50, gt=0, le=200, description="Cantidad máxima de registros"),

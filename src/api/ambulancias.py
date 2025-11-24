@@ -1,17 +1,15 @@
-from fastapi import APIRouter, HTTPException, status, Body, Query, Path, Depends
+from fastapi import APIRouter, HTTPException, status, Body, Query, Path
 from typing import List, Any, Dict, Optional
 from pydantic import BaseModel, Field
 from src.businessLayer.businessEntities.ambulancia import Ambulancia
 from src.businessLayer.businessComponents.entidades.servicioAmbulancia import (
     ServicioAmbulancia,
 )
-from src.api.security import require_auth
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
 
 ambulancias_router = APIRouter(
     prefix="/ambulancias",
     tags=["ambulancias"],
-    dependencies=[Depends(require_auth)]
 )
 
 class AmbulanciaCreate(BaseModel):

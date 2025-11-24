@@ -3,14 +3,13 @@ Endpoints para gestionar salas de LiveKit.
 Proporciona endpoints para listar y obtener información de salas activas.
 """
 
-from fastapi import APIRouter, HTTPException, status, Depends, Body
+from fastapi import APIRouter, HTTPException, status, Body
 from typing import List
 from pydantic import BaseModel, Field
 from src.businessLayer.businessComponents.llamadas.listarSalas import listar_salas_activas
 from src.businessLayer.businessComponents.llamadas.configLiveKit import get_room_service, LIVEKIT_URL
 from src.businessLayer.businessWorkflow.unirseSalaEmergencia import UnirseSalaEmergencia
 from livekit import api
-from src.api.security import require_auth
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,7 +17,6 @@ logger = logging.getLogger(__name__)
 salas_router = APIRouter(
     prefix="/salas",
     tags=["salas"],
-    dependencies=[Depends(require_auth)],
 )
 
 

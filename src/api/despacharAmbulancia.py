@@ -2,16 +2,14 @@
 Router para despachar ambulancias y emitir órdenes de despacho.
 """
 
-from fastapi import APIRouter, Body, HTTPException, status, Depends
+from fastapi import APIRouter, Body, HTTPException, status
 from pydantic import BaseModel, Field
 from src.businessLayer.businessEntities.ordenDespacho import OrdenDespacho
 from src.businessLayer.businessWorkflow.emitirOrdenDespacho import EmitirOrdenDespacho
-from src.api.security import require_auth
 
 despachar_ambulancia_router = APIRouter(
     prefix="/despachar-ambulancia",
     tags=["despachar-ambulancia"],
-    dependencies=[Depends(require_auth)]
 )
 
 
@@ -30,13 +28,11 @@ class DespacharAmbulanciaRequest(BaseModel):
     summary="Despachar ambulancia y emitir orden",
     description=(
         "Emite una orden de despacho asignando una ambulancia y operadores a una emergencia. "
-        "Este endpoint valida la disponibilidad de la ambulancia y notifica al solicitante. "
-        "Solo OPERADOR_EMERGENCIA y ADMINISTRADOR pueden realizar esta acción."
+        "Este endpoint valida la disponibilidad de la ambulancia y notifica al solicitante."
     ),
 )
 async def despachar_ambulancia(
-    despacho_data: DespacharAmbulanciaRequest = Body(...),
-    payload: dict = Depends(require_auth)
+    despacho_data: DespacharAmbulanciaRequest = Body(...)
 ):
     """
     Despacha una ambulancia para una emergencia.

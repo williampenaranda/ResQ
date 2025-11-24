@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Body, Query, Path, Depends
+from fastapi import APIRouter, HTTPException, status, Body, Query, Path
 from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, Field
 from datetime import date
@@ -7,12 +7,9 @@ from src.businessLayer.businessComponents.entidades.servicioSolicitante import (
     ServicioSolicitante,
 )
 from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
-from src.api.security import require_auth
-
 solicitantes_router = APIRouter(
     prefix="/solicitantes",
     tags=["solicitantes"]
-    # dependencies=[Depends(require_auth)]
 )
 
 

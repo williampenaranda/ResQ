@@ -2,21 +2,18 @@
 Router para valorar solicitudes y crear emergencias.
 """
 
-from fastapi import APIRouter, Body, HTTPException, status, Depends
+from fastapi import APIRouter, Body, HTTPException, status
 from pydantic import BaseModel, Field
 from src.businessLayer.businessEntities.emergencia import Emergencia
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
 from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
 from src.businessLayer.businessWorkflow.valorarSolicitud import ValorarSolicitud
-from src.api.security import require_auth, require_role
-from src.security.entities.Usuario import TipoUsuario
 from typing import Optional
 from src.businessLayer.businessComponents.entidades.buscarAmbulanciaCercana import BuscarAmbulanciaCercana
 
 valorar_emergencia_router = APIRouter(
     prefix="/valorar-emergencia",
     tags=["valorar-emergencia"],
-    dependencies=[Depends(require_auth)]
 )
 
 
@@ -43,13 +40,11 @@ class ValorarEmergenciaResponse(BaseModel):
     summary="Valorar solicitud y crear emergencia",
     description=(
         "Valora una solicitud y crea una emergencia. "
-        "Este endpoint crea la emergencia, notifica al solicitante y busca la ambulancia más cercana disponible. "
-        "Solo OPERADOR_EMERGENCIA y ADMINISTRADOR pueden valorar solicitudes."
+        "Este endpoint crea la emergencia, notifica al solicitante y busca la ambulancia más cercana disponible."
     ),
 )
 async def valorar_solicitud(
-    valoracion_data: ValorarSolicitudRequest = Body(...),
-    payload: dict = Depends(require_auth)
+    valoracion_data: ValorarSolicitudRequest = Body(...)
 ):
     """
     Valora una solicitud y crea una emergencia.

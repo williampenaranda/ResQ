@@ -1,13 +1,11 @@
-from fastapi import APIRouter, Body, HTTPException, status, Depends
+from fastapi import APIRouter, Body, HTTPException, status
 from pydantic import BaseModel, Field
 from datetime import datetime
 from src.businessLayer.businessWorkflow.solicitarAmbulancia import SolicitarAmbulancia
-from src.api.security import require_auth
 
 solicitudes_router = APIRouter(
     prefix="/solicitudes",
     tags=["solicitudes"],
-    dependencies=[Depends(require_auth)]
 )
 
 

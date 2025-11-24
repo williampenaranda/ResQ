@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, HTTPException, status, Query, Path, Depends
+from fastapi import APIRouter, Body, HTTPException, status, Query, Path
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
@@ -7,12 +7,9 @@ from src.businessLayer.businessEntities.enums.estadoEmergencia import EstadoEmer
 from src.businessLayer.businessEntities.enums.tipoAmbulancia import TipoAmbulancia
 from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPrioridad
 from src.businessLayer.businessComponents.entidades.servicioEmergencia import ServicioEmergencia
-from src.api.security import require_auth
-
 emergencias_router = APIRouter(
     prefix="/emergencias",
     tags=["emergencias"],
-    dependencies=[Depends(require_auth)]
 )
 
 # ======== Modelos para CRUD de Emergencias ========
@@ -36,7 +33,6 @@ class EmergenciaUpdate(BaseModel):
     response_model=List[Emergencia],
     summary="Listar emergencias por estado",
     description="Lista emergencias filtradas por estado.",
-    dependencies=[Depends(require_auth)],
 )
 def listar_emergencias_por_estado(
     estado: EstadoEmergencia = Path(..., description="Estado de la emergencia"),
@@ -59,7 +55,6 @@ def listar_emergencias_por_estado(
     response_model=List[Emergencia],
     summary="Listar emergencias por operador",
     description="Lista emergencias asignadas a un operador específico.",
-    dependencies=[Depends(require_auth)],
 )
 def listar_emergencias_por_operador(
     id_operador: int = Path(..., gt=0, description="ID del operador"),
@@ -82,7 +77,6 @@ def listar_emergencias_por_operador(
     response_model=List[Emergencia],
     summary="Listar emergencias por solicitante",
     description="Lista emergencias realizadas por un solicitante específico.",
-    dependencies=[Depends(require_auth)],
 )
 def listar_emergencias_por_solicitante(
     id_solicitante: int = Path(..., gt=0, description="ID del solicitante"),
@@ -105,7 +99,6 @@ def listar_emergencias_por_solicitante(
     response_model=Emergencia,
     summary="Obtener emergencia por solicitud",
     description="Obtiene la emergencia asociada a una solicitud específica.",
-    dependencies=[Depends(require_auth)],
 )
 def obtener_emergencia_por_solicitud(
     id_solicitud: int = Path(..., gt=0, description="ID de la solicitud"),
@@ -131,7 +124,6 @@ def obtener_emergencia_por_solicitud(
     response_model=List[Emergencia],
     summary="Listar emergencias",
     description="Lista todas las emergencias con paginación.",
-    dependencies=[Depends(require_auth)],
 )
 def listar_emergencias(
     limit: int = Query(50, ge=1, le=100, description="Número máximo de resultados"),
@@ -151,7 +143,6 @@ def listar_emergencias(
     response_model=Emergencia,
     summary="Obtener emergencia por ID",
     description="Obtiene una emergencia específica por su ID.",
-    dependencies=[Depends(require_auth)],
 )
 def obtener_emergencia(
     id_emergencia: int = Path(..., gt=0, description="ID de la emergencia"),
@@ -177,7 +168,6 @@ def obtener_emergencia(
     response_model=Emergencia,
     summary="Actualizar emergencia",
     description="Actualiza una emergencia existente.",
-    dependencies=[Depends(require_auth)],
 )
 def actualizar_emergencia(
     id_emergencia: int = Path(..., gt=0, description="ID de la emergencia"),
@@ -214,7 +204,6 @@ def actualizar_emergencia(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Eliminar emergencia",
     description="Elimina una emergencia por su ID.",
-    dependencies=[Depends(require_auth)],
 )
 def eliminar_emergencia(
     id_emergencia: int = Path(..., gt=0, description="ID de la emergencia"),

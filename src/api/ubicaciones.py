@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Body, Query, Path, Depends
+from fastapi import APIRouter, HTTPException, status, Body, Query, Path
 from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, Field
 from datetime import datetime
@@ -6,12 +6,9 @@ from src.businessLayer.businessEntities.ubicacion import Ubicacion
 from src.businessLayer.businessComponents.entidades.servicioUbicacion import (
     ServicioUbicacion,
 )
-from src.api.security import require_auth
-
 ubicaciones_router = APIRouter(
     prefix="/ubicaciones",
     tags=["ubicaciones"]
-    # dependencies=[Depends(require_auth)]
 )
 
 

@@ -94,8 +94,12 @@ class EmitirOrdenDespacho:
         # Notificar a los operadores de emergencia sobre la nueva orden de despacho
         # Usar mode='json' para convertir date/datetime a strings serializables
         
+        solicitante = getattr(creada.emergencia, "solicitante", None)
+        if not solicitante:
+            raise RuntimeError("La emergencia asociada a la orden no tiene un solicitante asignado")
+
         await notificar_emergencia_despachada(
-            creada.solicitante.id,
+            solicitante.id,
             creada.model_dump(mode='json')
         )
 

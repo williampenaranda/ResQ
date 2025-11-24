@@ -20,6 +20,7 @@ class SolicitudRequest(BaseModel):
     ubicacion: UbicacionRequest = Field(..., description="Ubicación del incidente")
 
 class SolicitarAmbulanciaResponse(BaseModel):
+    id_solicitud: int = Field(..., description="ID de la solicitud creada")
     room: str = Field(..., description="Nombre de la sala creada/asignada en LiveKit")
     token: str = Field(..., description="Token JWT de LiveKit para unirse a la sala")
     identity: str = Field(..., description="Identidad generada para el participante")
@@ -103,7 +104,24 @@ async def solicitar_ambulancia(
         # Procesar la solicitud a través del workflow
         result = await SolicitarAmbulancia.registrarSolicitud(solicitud_be)
 
-        return SolicitarAmbulanciaResponse(**result)
+        # Extraer el ID de la solicitud del resultado
+        id_solicitud = None
+        if "solicitud" in result and result["solicitud"]:
+            id_solicitud = result["solicitud"].get("id")
+        
+        if id_solicitud is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error: No se pudo obtener el ID de la solicitud creada"
+            )
+        
+        return SolicitarAmbulanciaResponse(
+            id_solicitud=id_solicitud,
+            room=result["room"],
+            token=result["token"],
+            identity=result["identity"],
+            server_url=result["server_url"]
+        )
 
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))

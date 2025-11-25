@@ -124,28 +124,6 @@ class VincularOperadorPorPlacaRequest(BaseModel):
 
 
 @ambulancias_router.put(
-    "/{id_ambulancia}/vincular-operador",
-    response_model=Ambulancia,
-    summary="Vincular operador de ambulancia",
-    description="Vincula un operador de ambulancia con una ambulancia específica.",
-)
-def vincular_operador_ambulancia(
-    id_ambulancia: int = Path(..., gt=0, description="ID de la ambulancia"),
-    request: VincularOperadorRequest = Body(...)
-):
-    try:
-        from src.dataLayer.dataAccesComponets.repositorioAmbulancia import vincular_operador_ambulancia as repo_vincular
-        ambulancia = repo_vincular(id_ambulancia, request.id_operador_ambulancia)
-        if ambulancia is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ambulancia no encontrada")
-        return ambulancia
-    except ValueError as ve:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
-
-@ambulancias_router.put(
     "/vincular-operador-por-placa",
     response_model=Ambulancia,
     summary="Vincular operador de ambulancia por placa",
@@ -174,5 +152,27 @@ def vincular_operador_por_placa(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@ambulancias_router.put(
+    "/{id_ambulancia}/vincular-operador",
+    response_model=Ambulancia,
+    summary="Vincular operador de ambulancia",
+    description="Vincula un operador de ambulancia con una ambulancia específica.",
+)
+def vincular_operador_ambulancia(
+    id_ambulancia: int = Path(..., gt=0, description="ID de la ambulancia"),
+    request: VincularOperadorRequest = Body(...)
+):
+    try:
+        from src.dataLayer.dataAccesComponets.repositorioAmbulancia import vincular_operador_ambulancia as repo_vincular
+        ambulancia = repo_vincular(id_ambulancia, request.id_operador_ambulancia)
+        if ambulancia is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ambulancia no encontrada")
+        return ambulancia
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

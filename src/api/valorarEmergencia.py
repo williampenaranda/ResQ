@@ -86,17 +86,26 @@ async def valorar_solicitud(
                 and emergencia_creada.id is not None
                 and valoracion_data.id_operador is not None
             ):
-                iniciar_envio_ambulancias(
+                print(f"[INFO] Iniciando envio de ubicacion: operador={valoracion_data.id_operador}, emergencia={emergencia_creada.id}, ambulancia={id_ambulancia_cercana}")
+                resultado = iniciar_envio_ambulancias(
                     id_operador=valoracion_data.id_operador,
                     emergencia_id=emergencia_creada.id,
                     id_ambulancia=id_ambulancia_cercana,
                 )
+                if resultado:
+                    print(f"[OK] Envio de ubicacion iniciado correctamente para emergencia {emergencia_creada.id}")
+                else:
+                    print(f"[WARN] No se pudo iniciar envio de ubicacion (ya existe tarea para emergencia {emergencia_creada.id})")
+            else:
+                print(f"[WARN] No se puede iniciar envio de ubicacion: id_ambulancia={id_ambulancia_cercana}, emergencia_id={emergencia_creada.id}, id_operador={valoracion_data.id_operador}")
         except Exception as e:
             # Si falla el inicio del envío periódico, no rompemos el flujo principal.
             print(
-                f"Error al iniciar envío de ubicación de ambulancia óptima "
+                f"[ERROR] Error al iniciar envío de ubicación de ambulancia óptima "
                 f"(emergencia {emergencia_creada.id}, ambulancia {id_ambulancia_cercana}): {e}"
             )
+            import traceback
+            traceback.print_exc()
             
         return ValorarEmergenciaResponse(
             emergencia=emergencia_creada,

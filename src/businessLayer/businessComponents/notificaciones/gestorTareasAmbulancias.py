@@ -55,6 +55,12 @@ async def _enviar_info_ambulancia_periodicamente(
                 # Obtener la ubicación de la ambulancia desde Redis
                 valor_ubicacion = client.get(key_ubicacion)
 
+                if not valor_ubicacion:
+                    # Si no hay ubicación en Redis, la ambulancia no está conectada
+                    print(f"[WARN] No hay ubicacion en Redis para ambulancia {id_ambulancia} (key: {key_ubicacion})")
+                    await asyncio.sleep(1)
+                    continue
+
                 if valor_ubicacion:
                     try:
                         # Parsear JSON
@@ -65,17 +71,20 @@ async def _enviar_info_ambulancia_periodicamente(
                         longitud = datos_ubicacion.get("longitud")
 
                         if latitud is not None and longitud is not None:
-                            # Preparar mensaje con tipo, latitud y longitud
+                            # Preparar mensaje con type (no tipo) para compatibilidad con frontend
+                            # El frontend espera: { type: "ubicacion_ambulancia", latitud, longitud, id_ambulancia }
                             mensaje = json.dumps(
                                 {
-                                    "tipo": "ubicacion_ambulancia",
+                                    "type": "ubicacion_ambulancia",
                                     "latitud": latitud,
                                     "longitud": longitud,
+                                    "id_ambulancia": id_ambulancia,
                                 }
                             )
 
                             # Enviar al operador usando send_to_id
                             await manager.send_to_id(mensaje, id_operador)
+                            print(f"[DEBUG] Enviada ubicacion de ambulancia {id_ambulancia} al operador {id_operador}: lat={latitud}, lng={longitud}")
 
                     except (json.JSONDecodeError, KeyError) as e:
                         # Si hay error al parsear, continuar sin enviar esta vez
@@ -125,7 +134,10 @@ def iniciar_envio_ambulancias(
     """
     # Si ya existe una tarea para esta emergencia, no crear otra
     if emergencia_id in _tareas_activas:
+        print(f"[WARN] Ya existe una tarea activa para emergencia {emergencia_id}")
         return False
+
+    print(f"[INFO] Iniciando envio de ubicacion de ambulancia {id_ambulancia} al operador {id_operador} para emergencia {emergencia_id}")
 
     # Crear la tarea asíncrona
     try:
@@ -144,6 +156,7 @@ def iniciar_envio_ambulancias(
     )
 
     _tareas_activas[emergencia_id] = task
+    print(f"[INFO] Tarea creada exitosamente para emergencia {emergencia_id}")
     return True
 
 

@@ -84,12 +84,14 @@ class ValorarSolicitud:
             raise RuntimeError("Error al crear la emergencia. Verifique que todos los IDs sean válidos.")
 
         # Notificar a los solicitantes sobre la nueva emergencia
-        # Solo enviar el ID y el estado
+        # Enviar el ID, el estado y la hora de valoración
+        from datetime import datetime, timezone
         await notificar_emergencia_valorada(
             creada.solicitante.id,
             {
                 "id": creada.id,
-                "estado": creada.estado.value if hasattr(creada.estado, 'value') else str(creada.estado)
+                "estado": creada.estado.value if hasattr(creada.estado, 'value') else str(creada.estado),
+                "fechaHora": datetime.now(timezone.utc).isoformat()
             }
         )
 

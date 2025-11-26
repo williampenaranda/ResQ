@@ -107,16 +107,20 @@ class EmitirOrdenDespacho:
         if not solicitante:
             raise RuntimeError("La emergencia asociada a la orden no tiene un solicitante asignado")
 
+        # Agregar la hora de despacho al mensaje
+        from datetime import timezone
         await notificar_emergencia_despachada(
             solicitante.id,
             {
                 "id": emergencia_asociada.id,
                 "estado": EstadoEmergencia.ASIGNADA.value,
+                "fechaHora": datetime.now(timezone.utc).isoformat(),
                 "ordenDespacho": creada.model_dump(mode='json')
             }
         )
 
         # Notificar a la ambulancia seleccionada
+        print(f"[DEBUG] Enviando orden de despacho a ambulancia {ambulancia_id} para emergencia {emergencia_id}")
         await notificar_orden_despacho(
             id_ambulancia=ambulancia_id,
             datos_orden={
@@ -126,6 +130,7 @@ class EmitirOrdenDespacho:
                 "nivelPrioridad": creada.emergencia.nivelPrioridad.value if hasattr(creada.emergencia.nivelPrioridad, 'value') else str(creada.emergencia.nivelPrioridad)
             }
         )
+        print(f"[DEBUG] Orden de despacho enviada exitosamente a ambulancia {ambulancia_id}")
 
         # Detener el envío periódico de información de ambulancias para esta emergencia
         from src.businessLayer.businessComponents.notificaciones.gestorTareasAmbulancias import detener_envio_ambulancias

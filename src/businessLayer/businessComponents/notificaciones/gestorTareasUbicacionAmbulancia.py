@@ -38,6 +38,28 @@ async def _enviar_ubicacion_ambulancia_periodicamente(
     client = get_redis_client()
     key_ubicacion = f"ambulancia:{id_ambulancia}:ubicacion"
     
+    # Enviar la primera ubicación inmediatamente si está disponible
+    try:
+        valor_ubicacion_inicial = client.get(key_ubicacion)
+        if valor_ubicacion_inicial:
+            try:
+                datos_ubicacion = json.loads(valor_ubicacion_inicial)
+                latitud = datos_ubicacion.get('latitud')
+                longitud = datos_ubicacion.get('longitud')
+                
+                if latitud is not None and longitud is not None:
+                    mensaje = json.dumps({
+                        "type": "ubicacion_ambulancia",
+                        "latitud": latitud,
+                        "longitud": longitud
+                    })
+                    await manager.send_to_id(mensaje, id_solicitante)
+                    print(f"[DEBUG] Primera ubicación de ambulancia {id_ambulancia} enviada inmediatamente al solicitante {id_solicitante}")
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"Error al parsear ubicación inicial de ambulancia {id_ambulancia}: {e}")
+    except Exception as e:
+        print(f"Error al obtener ubicación inicial de ambulancia {id_ambulancia}: {e}")
+    
     try:
         while True:
             try:
@@ -60,9 +82,9 @@ async def _enviar_ubicacion_ambulancia_periodicamente(
                         longitud = datos_ubicacion.get('longitud')
                         
                         if latitud is not None and longitud is not None:
-                            # Preparar mensaje con tipo, latitud y longitud
+                            # Preparar mensaje con type, latitud y longitud
                             mensaje = json.dumps({
-                                "tipo": "ubicacion_ambulancia",
+                                "type": "ubicacion_ambulancia",
                                 "latitud": latitud,
                                 "longitud": longitud
                             })

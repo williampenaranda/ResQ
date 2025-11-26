@@ -38,6 +38,12 @@ async def despachar_ambulancia(
     Despacha una ambulancia para una emergencia.
     """
     try:
+        print(f"[DEBUG] [DESPACHO] Recibida solicitud de despacho:")
+        print(f"[DEBUG] [DESPACHO]   - emergencia_id: {despacho_data.emergencia_id}")
+        print(f"[DEBUG] [DESPACHO]   - ambulancia_id: {despacho_data.ambulancia_id}")
+        print(f"[DEBUG] [DESPACHO]   - operador_ambulancia_id: {despacho_data.operador_ambulancia_id}")
+        print(f"[DEBUG] [DESPACHO]   - operador_emergencia_id: {despacho_data.operador_emergencia_id}")
+        
         orden_creada = await EmitirOrdenDespacho.emitir_orden_despacho(
             emergencia_id=despacho_data.emergencia_id,
             ambulancia_id=despacho_data.ambulancia_id,

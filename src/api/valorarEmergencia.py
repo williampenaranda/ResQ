@@ -10,6 +10,9 @@ from src.businessLayer.businessEntities.enums.nivelPrioridad import NivelPriorid
 from src.businessLayer.businessWorkflow.valorarSolicitud import ValorarSolicitud
 from typing import Optional
 from src.businessLayer.businessComponents.entidades.buscarAmbulanciaCercana import BuscarAmbulanciaCercana
+from src.businessLayer.businessComponents.notificaciones.gestorTareasAmbulancias import (
+    iniciar_envio_ambulancias,
+)
 
 valorar_emergencia_router = APIRouter(
     prefix="/valorar-emergencia",
@@ -61,7 +64,7 @@ async def valorar_solicitud(
             solicitante_id=valoracion_data.solicitante_id
         )
         
-        # 2. Buscar la ambulancia más cercana
+        # 2. Buscar la ambulancia más cercana (solo una vez)
         id_ambulancia_cercana = None
         try:
             if emergencia_creada.solicitud and emergencia_creada.solicitud.ubicacion:
@@ -71,9 +74,29 @@ async def valorar_solicitud(
                     nivel_prioridad=emergencia_creada.nivelPrioridad
                 )
         except Exception as e:
-            # Si falla la búsqueda de ambulancia, no fallamos la creación de la emergencia
-            # Solo logueamos el error (aquí print por simplicidad)
+            # Si falla la búsqueda de ambulancia, no fallamos la creación de la emergencia.
+            # Solo logueamos el error (aquí print por simplicidad).
             print(f"Error al buscar ambulancia cercana: {e}")
+
+        # 3. Iniciar el envío periódico de la ubicación de la ambulancia óptima al operador
+        #    (solo si se encontró una ambulancia y hay operador asociado)
+        try:
+            if (
+                id_ambulancia_cercana is not None
+                and emergencia_creada.id is not None
+                and valoracion_data.id_operador is not None
+            ):
+                iniciar_envio_ambulancias(
+                    id_operador=valoracion_data.id_operador,
+                    emergencia_id=emergencia_creada.id,
+                    id_ambulancia=id_ambulancia_cercana,
+                )
+        except Exception as e:
+            # Si falla el inicio del envío periódico, no rompemos el flujo principal.
+            print(
+                f"Error al iniciar envío de ubicación de ambulancia óptima "
+                f"(emergencia {emergencia_creada.id}, ambulancia {id_ambulancia_cercana}): {e}"
+            )
             
         return ValorarEmergenciaResponse(
             emergencia=emergencia_creada,

@@ -93,12 +93,15 @@ class ValorarSolicitud:
             }
         )
 
-        # Iniciar el envío periódico de información de ambulancias al operador
+        # Iniciar el envío periódico de la ubicación de la ambulancia más cercana al operador
         from src.businessLayer.businessComponents.notificaciones.gestorTareasAmbulancias import iniciar_envio_ambulancias
-        iniciar_envio_ambulancias(
-            id_operador=id_operador,
-            emergencia_id=creada.id,
-            tipo_ambulancia=tipo_ambulancia
-        )
+        if creada.solicitud and creada.solicitud.ubicacion:
+            iniciar_envio_ambulancias(
+                id_operador=id_operador,
+                emergencia_id=creada.id,
+                tipo_ambulancia=tipo_ambulancia,
+                ubicacion_emergencia=creada.solicitud.ubicacion,
+                nivel_prioridad=nivel_prioridad
+            )
 
         return creada

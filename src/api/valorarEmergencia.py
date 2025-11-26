@@ -107,10 +107,21 @@ async def valorar_solicitud(
             import traceback
             traceback.print_exc()
             
-        return ValorarEmergenciaResponse(
+        # Log para verificar que se está enviando id_ambulancia_cercana
+        print(f"[DEBUG] [VALORACION] Enviando respuesta con id_ambulancia_cercana: {id_ambulancia_cercana}")
+        print(f"[DEBUG] [VALORACION] Tipo de id_ambulancia_cercana: {type(id_ambulancia_cercana)}")
+        
+        respuesta = ValorarEmergenciaResponse(
             emergencia=emergencia_creada,
             id_ambulancia_cercana=id_ambulancia_cercana
         )
+        
+        # Log del modelo serializado
+        respuesta_dict = respuesta.model_dump(mode='json')
+        print(f"[DEBUG] [VALORACION] Respuesta serializada: {respuesta_dict}")
+        print(f"[DEBUG] [VALORACION] id_ambulancia_cercana en respuesta: {respuesta_dict.get('id_ambulancia_cercana')}")
+        
+        return respuesta
         
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))

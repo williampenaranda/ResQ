@@ -136,10 +136,17 @@ class BuscarAmbulanciaCercana:
         tipo_requerido = tipo_ambulancia.value
         candidatas = []
         
+        print(f"[DEBUG] Buscando ambulancia tipo: {tipo_requerido}")
+        print(f"[DEBUG] Ubicación emergencia: lat={lat_emergencia}, lon={lon_emergencia}")
+        print(f"[DEBUG] Total ambulancias conectadas: {len(ambulancias_conectadas)}")
+        
         for id_ambulancia, datos in ambulancias_conectadas:
             # Filtrar por tipo de ambulancia
             tipo_ambulancia_actual = datos.get('tipoAmbulancia')
+            print(f"[DEBUG] Ambulancia {id_ambulancia}: tipo={tipo_ambulancia_actual}, lat={datos.get('latitud')}, lon={datos.get('longitud')}")
+            
             if tipo_ambulancia_actual != tipo_requerido:
+                print(f"[DEBUG] Ambulancia {id_ambulancia} descartada: tipo {tipo_ambulancia_actual} != {tipo_requerido}")
                 continue
             
             # Obtener coordenadas
@@ -147,6 +154,7 @@ class BuscarAmbulanciaCercana:
             lon_ambulancia = datos.get('longitud')
             
             if lat_ambulancia is None or lon_ambulancia is None:
+                print(f"[DEBUG] Ambulancia {id_ambulancia} descartada: coordenadas inválidas")
                 continue
             
             # Calcular distancia
@@ -155,17 +163,27 @@ class BuscarAmbulanciaCercana:
                 lat_ambulancia, lon_ambulancia
             )
             
-            # Early exit: si encontramos una muy cercana (< 1km), retornar inmediatamente
-            if distancia < 1.0:
-                return id_ambulancia
+            print(f"[DEBUG] Ambulancia {id_ambulancia}: distancia={distancia:.4f} km")
             
+            # Agregar a candidatas (sin early exit para asegurar que siempre se seleccione la más cercana)
             candidatas.append((distancia, id_ambulancia))
         
         # Si no hay candidatas del tipo requerido
         if not candidatas:
+            print(f"[DEBUG] No hay candidatas del tipo {tipo_requerido}")
             return None
         
+        print(f"[DEBUG] Candidatas encontradas: {len(candidatas)}")
+        for dist, id_amb in candidatas:
+            print(f"[DEBUG]   - Ambulancia {id_amb}: {dist:.4f} km")
+        
         # Ordenar por distancia (ascendente) y retornar la más cercana
-        candidatas.sort(key=lambda x: x[0])
-        return candidatas[0][1]
+        # Si hay empates en distancia, ordenar también por ID para consistencia
+        candidatas.sort(key=lambda x: (x[0], x[1]))
+        
+        id_seleccionada = candidatas[0][1]
+        distancia_seleccionada = candidatas[0][0]
+        print(f"[DEBUG] Ambulancia seleccionada: {id_seleccionada} (distancia: {distancia_seleccionada:.4f} km)")
+        
+        return id_seleccionada
 

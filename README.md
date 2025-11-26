@@ -131,6 +131,8 @@ ResQ/
 - **Redis** (requerido para cache de ubicaciones en tiempo real)
 - **LiveKit** (opcional, para llamadas de voz/video)
 
+> **📘 Para usuarios no expertos**: Si es tu primera vez instalando este tipo de software, consulta la **[Guía de Despliegue Completa](GUIA_DESPLIEGUE.md)** que incluye instrucciones paso a paso detalladas para instalar Python, PostgreSQL, Redis y configurar todo el sistema.
+
 ## 🚀 Instalación
 
 ### 1. Clonar el repositorio

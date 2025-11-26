@@ -8,6 +8,9 @@ from src.businessLayer.businessEntities.enums.tipoDocumento import TipoDocumento
 from src.businessLayer.businessComponents.entidades.servicioOperadorAmbulancia import (
     ServicioOperadorAmbulancia,
 )
+from src.businessLayer.businessComponents.entidades.servicioAmbulancia import (
+    ServicioAmbulancia,
+)
 operadores_ambulancia_router = APIRouter(
     prefix="/operadores-ambulancia",
     tags=["operadores-ambulancia"],
@@ -132,6 +135,40 @@ def eliminar_operador(
         return None
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+class AmbulanciaOperadorResponse(BaseModel):
+    """Modelo de respuesta con información de la ambulancia asignada al operador."""
+    id: int = Field(..., description="ID de la ambulancia")
+    placa: str = Field(..., description="Placa de la ambulancia")
+
+
+@operadores_ambulancia_router.get(
+    "/{id_operador}/ambulancia",
+    response_model=AmbulanciaOperadorResponse,
+    summary="Obtener ambulancia asignada al operador",
+    description="Obtiene el ID y la placa de la ambulancia asignada a un operador de ambulancia.",
+)
+def obtener_ambulancia_por_operador(
+    id_operador: int = Path(..., gt=0, description="ID del operador de ambulancia"),
+):
+    try:
+        ambulancia = ServicioAmbulancia.obtener_por_operador(id_operador)
+        if not ambulancia:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No se encontró una ambulancia asignada a este operador"
+            )
+        return AmbulanciaOperadorResponse(
+            id=ambulancia.id,
+            placa=ambulancia.placa
+        )
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

@@ -5,6 +5,7 @@ from src.dataLayer.dataAccesComponets.repositorioAmbulancia import (
     crear_ambulancia as repo_crear_ambulancia,
     obtener_ambulancia_por_id as repo_obtener_por_id,
     obtener_ambulancia_por_placa as repo_obtener_por_placa,
+    obtener_ambulancia_por_operador as repo_obtener_por_operador,
     listar_ambulancias as repo_listar_ambulancias,
     listar_ambulancias_disponibles as repo_listar_disponibles,
     listar_ambulancias_por_tipo as repo_listar_por_tipo,
@@ -61,6 +62,15 @@ class ServicioAmbulancia:
         if not placa or not isinstance(placa, str) or not placa.strip():
             raise ValueError("placa inválida")
         return repo_obtener_por_placa(placa.strip())
+
+    @staticmethod
+    def obtener_por_operador(id_operador_ambulancia: int) -> Optional[Ambulancia]:
+        """
+        Obtiene la ambulancia asignada a un operador de ambulancia.
+        """
+        if not isinstance(id_operador_ambulancia, int) or id_operador_ambulancia <= 0:
+            raise ValueError("id_operador_ambulancia inválido")
+        return repo_obtener_por_operador(id_operador_ambulancia)
 
     @staticmethod
     def listar(limit: int = 50, offset: int = 0) -> List[Ambulancia]:

@@ -226,6 +226,28 @@ def eliminar_ambulancia(id_ambulancia: int) -> bool:
         sesion.close()
 
 
+def obtener_ambulancia_por_operador(id_operador_ambulancia: int) -> Optional[AmbulanciaBE]:
+    """
+    Obtiene la ambulancia asignada a un operador de ambulancia.
+    
+    Args:
+        id_operador_ambulancia: ID del operador de ambulancia
+        
+    Returns:
+        Ambulancia asignada al operador o None si no se encuentra
+    """
+    sesion: Session = SessionLocal()
+    try:
+        db_obj = sesion.query(AmbulanciaDB).filter(
+            AmbulanciaDB.id_operador_ambulancia == id_operador_ambulancia
+        ).first()
+        return _mapear_db_a_be(db_obj) if db_obj else None
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Error al obtener ambulancia por operador: {e}")
+    finally:
+        sesion.close()
+
+
 def vincular_operador_ambulancia(id_ambulancia: int, id_operador_ambulancia: int) -> Optional[AmbulanciaBE]:
     """
     Vincula un operador de ambulancia con una ambulancia.

@@ -72,6 +72,9 @@ async def obtener_info_websocket(request: Request) -> WebSocketInfoResponse:
     elif not base_url.startswith("ws://") and not base_url.startswith("wss://"):
         base_url = f"ws://{base_url}"
     
+    # Eliminar trailing slash para evitar doble slash al concatenar
+    base_url = base_url.rstrip('/')
+    
     websocket_url = f"{base_url}/ws/operadores-emergencia"
     
     return WebSocketInfoResponse(

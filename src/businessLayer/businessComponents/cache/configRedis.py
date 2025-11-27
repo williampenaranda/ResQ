@@ -16,6 +16,11 @@ REDIS_HOST: Optional[str] = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_PASSWORD: Optional[str] = os.getenv("REDIS_PASSWORD")
 REDIS_DB: int = int(os.getenv("REDIS_DB", "0"))
+# SSL/TLS para Redis (requerido para Upstash y otros servicios cloud)
+REDIS_SSL: bool = os.getenv("REDIS_SSL", "false").lower() in ("true", "1", "yes")
+# Auto-detectar SSL si el host es de Upstash
+if REDIS_HOST and ".upstash.io" in REDIS_HOST:
+    REDIS_SSL = True
 
 # Instancia global del cliente Redis (singleton pattern)
 _redis_client: Optional[redis.Redis] = None
@@ -53,16 +58,23 @@ def get_redis_client() -> redis.Redis:
     if _redis_client is None:
         validate_redis_config()
         
-        # Crear cliente Redis
-        _redis_client = redis.Redis(
-            host=REDIS_HOST,
-            port=REDIS_PORT,
-            password=REDIS_PASSWORD,
-            db=REDIS_DB,
-            decode_responses=True,  # Decodificar respuestas como strings
-            socket_connect_timeout=5,  # Timeout de conexión de 5 segundos
-            socket_timeout=5,  # Timeout de operaciones de 5 segundos
-        )
+        # Crear cliente Redis con soporte para SSL/TLS
+        redis_kwargs = {
+            "host": REDIS_HOST,
+            "port": REDIS_PORT,
+            "password": REDIS_PASSWORD,
+            "db": REDIS_DB,
+            "decode_responses": True,  # Decodificar respuestas como strings
+            "socket_connect_timeout": 5,  # Timeout de conexión de 5 segundos
+            "socket_timeout": 5,  # Timeout de operaciones de 5 segundos
+        }
+        
+        # Agregar SSL si está habilitado (requerido para Upstash y otros servicios cloud)
+        if REDIS_SSL:
+            redis_kwargs["ssl"] = True
+            redis_kwargs["ssl_cert_reqs"] = None  # No requiere certificado del servidor
+        
+        _redis_client = redis.Redis(**redis_kwargs)
         
         # Verificar conexión
         try:

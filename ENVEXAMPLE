@@ -33,14 +33,30 @@ JWT_EXPIRE_MINUTES=1440
 # ============================================
 
 # Host de Redis (por defecto: localhost)
+# Para Upstash: usar el endpoint completo (ej: related-ferret-6077.upstash.io)
 REDIS_HOST=localhost
 
 # Puerto de Redis (por defecto: 6379)
 REDIS_PORT=6379
 
 # Contraseña de Redis (opcional, dejar vacío si no se requiere)
+# Para Upstash: usar el token de autenticación
 REDIS_PASSWORD=
 
 # Base de datos de Redis (por defecto: 0)
 # Redis permite múltiples bases de datos numeradas (0-15)
 REDIS_DB=0
+
+# SSL/TLS para Redis (true/false)
+# Requerido para Upstash y otros servicios cloud de Redis
+# Se auto-detecta si el host contiene ".upstash.io"
+REDIS_SSL=false
+
+# ============================================
+# Configuracion de API Base URL
+# ============================================
+
+# URL base de la API (para construir URLs de WebSocket)
+# En producción: usar la URL completa del backend (ej: https://resq-api-jj3j.onrender.com)
+# IMPORTANTE: No incluir trailing slash al final
+API_BASE_URL=https://resq-api-jj3j.onrender.com

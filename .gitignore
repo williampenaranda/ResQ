@@ -1,5 +1,12 @@
 env
 .env
+venv/
+.venv/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 
 # IDE
 .vscode/

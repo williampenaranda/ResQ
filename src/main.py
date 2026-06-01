@@ -37,7 +37,11 @@ async def lifespan(app: FastAPI):
         print(f"Error al inicializar la base de datos: {e}")
         raise
     
-    await ensure_livekit_healthcheck()
+    try:
+        await ensure_livekit_healthcheck()
+    except Exception as e:
+        print(f"Advertencia: LiveKit no está disponible: {e}")
+        print("El sistema continuará pero las funcionalidades de llamadas no estarán disponibles.")
     
     # Validar Redis
     try:

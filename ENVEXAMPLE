@@ -2,29 +2,19 @@
 # Configuracion de Base de Datos
 # ============================================
 
-# Para SQLite (desarrollo local - por defecto)
-# No requiere configuracion adicional, se crea automaticamente el archivo resq.db
-DATABASE_URL=sqlite:///./resq.db
+# Para PostgreSQL (produccion - recomendado)
+DATABASE_URL=postgresql://resq:resq@localhost:5432/resq
 
-# Para PostgreSQL (produccion)
-# Descomenta y configura con tus credenciales:
-# DATABASE_URL=postgresql://usuario:contraseÃ±a@localhost:5432/resq
-
-# Para MySQL (alternativa)
-# DATABASE_URL=mysql+pymysql://usuario:contraseÃ±a@localhost:3306/resq
+# Para SQLite (desarrollo local)
+# DATABASE_URL=sqlite:///./resq.db
 
 
 # ============================================
 # Configuracion de JWT (Autenticacion)
 # ============================================
 
-# Clave secreta para firmar los tokens JWT
-# IMPORTANTE: Cambia esto en produccion por una clave segura y aleatoria
 # Genera una clave segura con: python -c "import secrets; print(secrets.token_urlsafe(32))"
 JWT_SECRET_KEY=tu-clave-secreta-super-segura-cambiar-en-produccion
-
-# Tiempo de expiracion del token en minutos (1440 = 24 horas)
-# Ajusta segun tus necesidades de seguridad
 JWT_EXPIRE_MINUTES=1440
 
 
@@ -32,31 +22,24 @@ JWT_EXPIRE_MINUTES=1440
 # Configuracion de Redis (Cache en Memoria)
 # ============================================
 
-# Host de Redis (por defecto: localhost)
-# Para Upstash: usar el endpoint completo (ej: related-ferret-6077.upstash.io)
 REDIS_HOST=localhost
-
-# Puerto de Redis (por defecto: 6379)
 REDIS_PORT=6379
-
-# Contraseña de Redis (opcional, dejar vacío si no se requiere)
-# Para Upstash: usar el token de autenticación
 REDIS_PASSWORD=
-
-# Base de datos de Redis (por defecto: 0)
-# Redis permite múltiples bases de datos numeradas (0-15)
 REDIS_DB=0
-
-# SSL/TLS para Redis (true/false)
-# Requerido para Upstash y otros servicios cloud de Redis
-# Se auto-detecta si el host contiene ".upstash.io"
 REDIS_SSL=false
+
+
+# ============================================
+# Configuracion de LiveKit (Llamadas de voz/video)
+# ============================================
+
+LIVEKIT_URL=http://localhost:7880
+LIVEKIT_API_KEY=devkey
+LIVEKIT_API_SECRET=devsecret
+
 
 # ============================================
 # Configuracion de API Base URL
 # ============================================
 
-# URL base de la API (para construir URLs de WebSocket)
-# En producción: usar la URL completa del backend (ej: https://resq-api-jj3j.onrender.com)
-# IMPORTANTE: No incluir trailing slash al final
-API_BASE_URL=https://resq-api-jj3j.onrender.com
+API_BASE_URL=http://localhost:8000
